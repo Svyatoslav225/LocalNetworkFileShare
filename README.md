@@ -1,5 +1,5 @@
 # LocalNetworkFileShare
-Recommendations (follow them if you don't want to get bug):
+Recommendations (follow them if you don't want to catch bug):
 
 - Use buttons and panels to interact with program.
 - Don't use symbols ':','\n' in device name or commit name.

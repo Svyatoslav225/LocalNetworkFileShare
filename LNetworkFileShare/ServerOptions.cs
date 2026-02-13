@@ -203,40 +203,44 @@ namespace LNetworkFileShare
         }
         private void SaveOptions()
         {
-            string PrevFile = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + @"\mainConfig.cfg");
-            string[] splttd = PrevFile.Split('\n');
-            string res = "";
-            for (int i = 0; i <= 2;i++)
+            try
             {
-                res += splttd[i] + "\n";
+                string PrevFile = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + @"\mainConfig.cfg");
+                string[] splttd = PrevFile.Split('\n');
+                string res = "";
+                for (int i = 0; i <= 2; i++)
+                {
+                    res += splttd[i] + "\n";
+                }
+                if (Convert.ToInt32(textBox1.Text) > 65535 || Convert.ToInt32(textBox1.Text) < 0)
+                {
+                    MessageBox.Show("Incorrect port", "Error");
+                    return;
+                }
+                res += $"Server_port {textBox1.Text}\n";
+                res += "Server_type ";
+                if (checkBox1.Checked)
+                {
+                    res += "0\n";
+                }
+                else if (checkBox2.Checked)
+                {
+                    res += "1\n";
+                }
+                res += "Server_encoding ";
+                if (checkBox3.Checked)
+                {
+                    res += "0\n";
+                }
+                else if (checkBox4.Checked)
+                {
+                    res += "1\n";
+                }
+                res += $"Server_password {textBox2.Text}\n";
+                res += $"Server_name {textBox3.Text}\n";
+                File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + @"\mainConfig.cfg", res);
             }
-            if (Convert.ToInt32(textBox1.Text) > 65535 || Convert.ToInt32(textBox1.Text) < 0)
-            {
-                MessageBox.Show("Incorrect port", "Error");
-                return;
-            }
-            res += $"Server_port {textBox1.Text}\n";
-            res += "Server_type ";
-            if (checkBox1.Checked)
-            {
-                res += "0\n";
-            }
-            else if (checkBox2.Checked)
-            {
-                res += "1\n";
-            }
-            res += "Server_encoding ";
-            if (checkBox3.Checked)
-            {
-                res += "0\n";
-            }
-            else if (checkBox4.Checked)
-            {
-                res += "1\n";
-            }
-            res += $"Server_password {textBox2.Text}\n";
-            res += $"Server_name {textBox3.Text}\n";
-            File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + @"\mainConfig.cfg", res);
+            catch (Exception ex) { MessageBox.Show(ex.ToString(),"Error"); };
         }
         private void label3_Click(object sender, EventArgs e)
         {

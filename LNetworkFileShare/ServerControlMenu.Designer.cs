@@ -301,6 +301,7 @@
             button3.Text = "Disconnect all connections";
             button3.UseVisualStyleBackColor = true;
             button3.Click += button3_Click;
+            button3.MouseClick += button3_MouseClick;
             // 
             // label6
             // 

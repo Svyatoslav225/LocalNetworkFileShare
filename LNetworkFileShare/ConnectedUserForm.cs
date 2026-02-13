@@ -263,12 +263,19 @@ namespace LocalNetworkFileShare
             }
             panel4.Height = PosY + 300;
         }
+        /*   private void StartThreads()
+           {
+               //ThreadStart mainListener = new ThreadStart(async delegate { await ListenToServer(); });
+           }*/
         private async Task ListenToServer()
         {
             IPAddress addr = IPAddress.Parse(ServerIP);
             IPEndPoint EndP = new IPEndPoint(addr, Port);
             MainListener = new Socket(addr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             await MainListener.ConnectAsync(EndP);
+
+            byte[] buffReq = Encoding.UTF8.GetBytes("ASL");
+            await MainListener.SendAsync(buffReq, 0);
             while (true)
             {
                 byte[] bufferRec = new byte[4096];
@@ -280,9 +287,14 @@ namespace LocalNetworkFileShare
                     case "UPD":
                         UpdateCommitsList();
                         break;
+                    case "DD":
+
+                        this.Close();
+                        break;
                 }
             }
         }
+
         private void ConnectedUserForm_Load(object sender, EventArgs e)
         {
             label2.Text += ServerName;
@@ -291,6 +303,8 @@ namespace LocalNetworkFileShare
             label5.Text += ServerType;
             label6.Text += EncodingStr;
             UpdateCommitsList();
+            Task tsk = new Task(() => ListenToServer());
+            tsk.Start();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -382,7 +396,12 @@ namespace LocalNetworkFileShare
 
         private void richTextBox1_MouseClick(object sender, MouseEventArgs e)
         {
-            MessageBox.Show("This logger isn't completely done :(","info");
+            MessageBox.Show("This logger isn't completely done :(", "info");
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+
         }
     }
     class CommitCard

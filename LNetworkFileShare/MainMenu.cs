@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
 using LNetworkFileShare;
+using System.Net;
 
 namespace LocalNetworkFileShare
 {
@@ -122,7 +123,7 @@ namespace LocalNetworkFileShare
         {
             
         }
-
+    
         private void button1_MouseClick(object sender, MouseEventArgs e)
         {
             isProgramClosing = 2;

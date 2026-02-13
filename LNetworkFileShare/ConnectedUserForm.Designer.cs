@@ -250,6 +250,7 @@
             button3.TabIndex = 5;
             button3.Text = "Leave";
             button3.UseVisualStyleBackColor = false;
+            button3.Click += button3_Click;
             button3.MouseClick += button3_MouseClick;
             // 
             // label9

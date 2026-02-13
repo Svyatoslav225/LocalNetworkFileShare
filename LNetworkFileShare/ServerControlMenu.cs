@@ -27,6 +27,7 @@ namespace LocalNetworkFileShare
         List<Point> points = new List<Point>();
         List<ConnectedDevice> devices = new List<ConnectedDevice>();
         List<CommitData> CommitsList = new List<CommitData>();
+        List<Socket> listeners = new List<Socket>();
         Thread thread0;
         Socket MainListener;
         CancellationTokenSource cancThread0 = new CancellationTokenSource();
@@ -499,6 +500,9 @@ namespace LocalNetworkFileShare
                         case "FD":
 
                             break;
+                        case "ASL":
+                            listeners.Add(handler);
+                            break;
                     }
                     ConnectionsNum--;
                     label12.Text = ConnectionsNum.ToString();
@@ -680,25 +684,26 @@ namespace LocalNetworkFileShare
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-           
-                if (checkBox1.Checked)
+
+            if (checkBox1.Checked)
+            {
+                autoSavingPath = Interaction.InputBox("Full file name:", "Creating save file");
+                if (autoSavingPath != "")
                 {
-                    autoSavingPath = Interaction.InputBox("Full file name:", "Creating save file");
-                    if (autoSavingPath != "") {
-                        autoSaving = true;
-                    }
-                    else
-                    {
-                        autoSaving = false;
-                        checkBox1.Checked = false;
-                    }
+                    autoSaving = true;
                 }
                 else
                 {
-                    autoSavingPath = "";
                     autoSaving = false;
+                    checkBox1.Checked = false;
                 }
-            
+            }
+            else
+            {
+                autoSavingPath = "";
+                autoSaving = false;
+            }
+
         }
 
         private void richTextBox1_TextChanged(object sender, EventArgs e)
@@ -721,15 +726,39 @@ namespace LocalNetworkFileShare
                 if (!isServerPaused)
                 {
                     isServerPaused = true;
-                   // ConnectionsNum -= devices.Count;
+                    // ConnectionsNum -= devices.Count;
                     button4.BackColor = Color.OrangeRed;
+                    DateTime timeL = DateTime.Now;
+                    richTextBox1.Text += $"{timeL.Hour}h:{timeL.Minute}m:{timeL.Second}s >> Server paused;\n";
+
                 }
                 else
                 {
                     isServerPaused = false;
-                  //  ConnectionsNum += devices.Count;
+                    //  ConnectionsNum += devices.Count;
                     button4.BackColor = panel3.BackColor;
+                    DateTime timeL = DateTime.Now;
+                    richTextBox1.Text += $"{timeL.Hour}h:{timeL.Minute}m:{timeL.Second}s >> Server started;\n";
+
                 }
+            }
+        }
+
+        private void button3_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (checkBox3.Checked)
+            {
+               DeleteAllConnections();
+                DateTime timeL = DateTime.Now;
+                richTextBox1.Text += $"{timeL.Hour}h:{timeL.Minute}m:{timeL.Second}s >>  All connections have been deleted;\n";
+            }
+        }
+        private async Task DeleteAllConnections()
+        {
+            byte[] buffer = Encoding.UTF8.GetBytes("DD");
+            for (int ind = 0; ind < listeners.Count; ind++)
+            {
+                await listeners[ind].SendAsync(buffer,0);
             }
         }
     }
@@ -892,6 +921,7 @@ SCP = send commit package;
 GACI = get all commit ids;
 FD = file delete;
 DD = disconnect device;
+ALS = add listener socket;
 
 -Packages:
 ADTSL построение: ADTSL:[Server name];
@@ -905,6 +935,7 @@ SCP построение: SCP:[commit name]:[file weight in bytes];getter: SCP:[
 GACI построение: GACI:[commit ids list(spl by ' ')];
 FD построение: FD:[commit id];
 DD построение: DD:[ip];
+ALS построение: ALS;
  */
 
 

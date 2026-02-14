@@ -267,6 +267,7 @@ namespace LocalNetworkFileShare
            {
                //ThreadStart mainListener = new ThreadStart(async delegate { await ListenToServer(); });
            }*/
+
         private async Task ListenToServer()
         {
             IPAddress addr = IPAddress.Parse(ServerIP);
@@ -281,11 +282,10 @@ namespace LocalNetworkFileShare
                 byte[] bufferRec = new byte[4096];
                 int count = await MainListener.ReceiveAsync(bufferRec, 0);
                 string received = Encoding.UTF8.GetString(bufferRec, 0, count);
-
                 switch (received)
                 {
                     case "UPD":
-                        UpdateCommitsList();
+                        this.Invoke( new Action(() => UpdateCommitsList()));   
                         break;
                     case "DD":
 
@@ -303,8 +303,7 @@ namespace LocalNetworkFileShare
             label5.Text += ServerType;
             label6.Text += EncodingStr;
             UpdateCommitsList();
-            Task tsk = new Task(() => ListenToServer());
-            tsk.Start();
+            Task tsk = Task.Run(() => ListenToServer());
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -403,6 +402,11 @@ namespace LocalNetworkFileShare
         {
 
         }
+
+        private void panel4_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
     class CommitCard
     {
@@ -413,7 +417,7 @@ namespace LocalNetworkFileShare
         {
             Panel backGround = new Panel() { Parent = par,BackColor = Color.White,Location = Location,Size = new Size(210,100)};
             Label name = new Label() { Text = CommitName,ForeColor = Color.Black,Parent = backGround, Location = new Point(10,10),Size = new Size(180,20)};
-            Label weight = new Label() { Text = Weight, ForeColor = Color.Black,Parent = backGround, Location = new Point(10, 30), Size = new Size(60,20)};
+            Label weight = new Label() { Text = Weight, ForeColor = Color.Black,Parent = backGround, Location = new Point(10, 30), Size = new Size(180,20)};
             name.Click += new EventHandler(Click);
             name.Cursor = Cursors.Hand;
             backGround.Show();

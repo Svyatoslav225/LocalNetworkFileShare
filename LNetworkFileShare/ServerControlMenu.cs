@@ -440,6 +440,16 @@ namespace LocalNetworkFileShare
                             {
                                 File.WriteAllBytes(data.pathToFileInServer, buffRec);
                             }
+                            byte[] UpdBuffr = Encoding.UTF8.GetBytes("UPD");
+                            try
+                            {
+                                for (int ind = 0; ind < listeners.Count; ind++)
+                                {
+                                    await listeners[ind].SendAsync(UpdBuffr, 0);
+                                }
+                            }
+                            catch (Exception) { }
+
                             ansBuff = new byte[0];
                             buffRec = new byte[0];
                             /*      for (int index = 0;index < devices.Count;index++)

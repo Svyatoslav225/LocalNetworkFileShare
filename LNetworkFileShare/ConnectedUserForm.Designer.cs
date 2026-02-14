@@ -147,6 +147,7 @@
             panel4.Name = "panel4";
             panel4.Size = new Size(915, 998);
             panel4.TabIndex = 0;
+            panel4.Paint += panel4_Paint;
             // 
             // panel3
             // 

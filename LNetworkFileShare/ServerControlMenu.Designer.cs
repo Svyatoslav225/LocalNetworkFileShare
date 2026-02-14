@@ -62,10 +62,12 @@
             button7 = new Button();
             button8 = new Button();
             label12 = new Label();
+            richTextBox3 = new RichTextBox();
             panel1.SuspendLayout();
             panel3.SuspendLayout();
             panel4.SuspendLayout();
             panel5.SuspendLayout();
+            panel6.SuspendLayout();
             SuspendLayout();
             // 
             // richTextBox1
@@ -400,6 +402,7 @@
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(565, 35);
             textBox1.TabIndex = 17;
+            textBox1.TextChanged += textBox1_TextChanged;
             // 
             // label10
             // 
@@ -414,6 +417,7 @@
             // panel6
             // 
             panel6.BackColor = Color.White;
+            panel6.Controls.Add(richTextBox3);
             panel6.Location = new Point(13, 425);
             panel6.Margin = new Padding(3, 4, 3, 4);
             panel6.Name = "panel6";
@@ -456,6 +460,15 @@
             label12.Size = new Size(23, 28);
             label12.TabIndex = 22;
             label12.Text = "0";
+            // 
+            // richTextBox3
+            // 
+            richTextBox3.Location = new Point(3, 3);
+            richTextBox3.Name = "richTextBox3";
+            richTextBox3.ScrollBars = RichTextBoxScrollBars.Vertical;
+            richTextBox3.Size = new Size(545, 206);
+            richTextBox3.TabIndex = 0;
+            richTextBox3.Text = "";
             // 
             // ServerControlMenu
             // 
@@ -500,6 +513,7 @@
             panel4.PerformLayout();
             panel5.ResumeLayout(false);
             panel5.PerformLayout();
+            panel6.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
 
@@ -540,5 +554,6 @@
         private RichTextBox richTextBox2;
         private Label label12;
         private Label label13;
+        private RichTextBox richTextBox3;
     }
 }

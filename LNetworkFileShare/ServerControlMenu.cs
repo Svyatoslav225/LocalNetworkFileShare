@@ -161,6 +161,8 @@ namespace LocalNetworkFileShare
                         richTextBox2.BackColor = richTextBox2.Parent.BackColor;
                         richTextBox2.ForeColor = button1.ForeColor;
                         label13.ForeColor = label1.ForeColor;
+                        richTextBox3.BackColor = richTextBox1.BackColor;
+                        richTextBox3.ForeColor = richTextBox1.ForeColor;
                     }
                     else if (words[0] == "UIText_language")
                     {
@@ -458,13 +460,16 @@ namespace LocalNetworkFileShare
                                   }*/
                             break;
                         case "GFFS":
-                            byte[] FileBuffer = File.ReadAllBytes(CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer);
-                            string[] spl = CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer.Split(".");
-                            byte[] bufferF = Encoding.UTF8.GetBytes($"GFFS:{FileBuffer.Length}:15:{spl[2]}");
-                            await handler.SendAsync(bufferF, 0);
-                            await handler.SendAsync(FileBuffer, 0);
-                            DateTime timeI = DateTime.Now;
-                            richTextBox1.Text += $"{timeI.Hour}h:{timeI.Minute}m:{timeI.Second}s >> User downloaded file from server ({FileBuffer.Length} bytes);\n";
+                            try
+                            {
+                                byte[] FileBuffer = File.ReadAllBytes(CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer);
+                                string[] spl = CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer.Split(".");
+                                byte[] bufferF = Encoding.UTF8.GetBytes($"GFFS:{FileBuffer.Length}:15:{spl[2]}");
+                                await handler.SendAsync(bufferF, 0);
+                                await handler.SendAsync(FileBuffer, 0);
+                                DateTime timeI = DateTime.Now;
+                                richTextBox1.Text += $"{timeI.Hour}h:{timeI.Minute}m:{timeI.Second}s >> User downloaded file from server ({FileBuffer.Length} bytes);\n";
+                            }catch (Exception) { }
                             break;
                         case "GACI":
                             string ids = "";
@@ -660,12 +665,86 @@ namespace LocalNetworkFileShare
         {
             refreshDevicesList();
         }
-
+        string ConsoleText = "";
         private void button7_MouseClick(object sender, MouseEventArgs e)
         {
-            MessageBox.Show("Sorry, console isn't working at this moment.", ":(");
-        }
+            //MessageBox.Show("Sorry, console isn't working at this moment.", ":(");
+            string[] textSpl = textBox1.Text.Split(" ");
+            ConsoleText += $"{textBox1.Text}\n";
+            switch (textSpl[0])
+            {
+                case "help":
+                    ConsoleText += "Commands:\n - disconn_dev [device IP] // disconnect device\n - del_comm '[commit name]' // delete commit\n - dev_info '[device name]' // device information\n";
+                    break;
+                case "disconn_dev":
+                    DisconnectDevice(textSpl[1]);
+                    break;
+                case "del_comm":
+                    string[] splD = textBox1.Text.Split("'");
 
+                    DeleteCommit(splD[1]);
+                    ConsoleText += $"Commit {splD[1]} was deleted;\n";
+                    break;
+                case "dev_info":
+                    string[] splDd = textBox1.Text.Split("'");
+                    int DeviceIndex = 0;
+                    for (int indx = 0;indx < devices.Count;indx++)
+                    {
+                        if (devices[indx].DeviceName == splDd[1])
+                        {
+                            DeviceIndex = indx;
+                        }
+                    }
+                    ConsoleText += $"Information about '{splDd[1]}':\n IP: {devices[DeviceIndex].IpAddress};\n Device name: {devices[DeviceIndex].DeviceName};\n";
+                    break;
+            }
+            richTextBox3.Text = ConsoleText;
+        }
+        private async Task DeleteCommit(string commitName)
+        {
+            try
+            {
+                int index = 0;
+                foreach (CommitData comm in CommitsList)
+                {
+                    if (comm.CommitName == commitName)
+                    {
+                        CommitsList[index].Status = false;
+                        File.Delete(comm.pathToFileInServer);
+                        byte[] UpdBuffr = Encoding.UTF8.GetBytes("UPD");
+                        try
+                        {
+                            for (int ind = 0; ind < listeners.Count; ind++)
+                            {
+                                await listeners[ind].SendAsync(UpdBuffr, 0);
+                            }
+                        }
+                        catch (Exception) { }
+                    }
+                    index++;
+                }
+            }
+            catch (Exception) { }
+        }
+        private async Task DisconnectDevice(string IP)
+        {
+            try
+            {
+                foreach (Socket sock in listeners)
+                {
+                    IPEndPoint remoteIp = (IPEndPoint)sock.RemoteEndPoint;
+                    IPAddress addr = remoteIp.Address;
+                    if (addr.ToString() == IP)
+                    {
+                        byte[] buffr = Encoding.UTF8.GetBytes("DD");
+                        await sock.SendAsync(buffr, 0);
+                        ConsoleText += $"IP {IP} was disconnected;\n";
+                        break;
+                    }
+                }
+            }
+            catch (Exception) { ConsoleText += $"Error, IP {IP} doesn't exists;\n"; }
+        }
         private void button1_MouseClick(object sender, MouseEventArgs e)
         {
             richTextBox1.Text = "";
@@ -758,7 +837,7 @@ namespace LocalNetworkFileShare
         {
             if (checkBox3.Checked)
             {
-               DeleteAllConnections();
+                DeleteAllConnections();
                 DateTime timeL = DateTime.Now;
                 richTextBox1.Text += $"{timeL.Hour}h:{timeL.Minute}m:{timeL.Second}s >>  All connections have been deleted;\n";
             }
@@ -768,8 +847,13 @@ namespace LocalNetworkFileShare
             byte[] buffer = Encoding.UTF8.GetBytes("DD");
             for (int ind = 0; ind < listeners.Count; ind++)
             {
-                await listeners[ind].SendAsync(buffer,0);
+                await listeners[ind].SendAsync(buffer, 0);
             }
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
     class ServerInfo

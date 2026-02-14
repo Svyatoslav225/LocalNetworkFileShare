@@ -136,7 +136,7 @@ namespace LocalNetworkFileShare
                                 label8.Text = "Системный лог:";
                                 label9.Text = "Имя этого устройсва:\n";
                                 button2.Text = "Обзор";
-                                button2.Text = "Загрузить";
+                                button1.Text = "Загрузить";
                                 button3.Text = "Выйти";
                                 break;
                             case "2":
@@ -210,8 +210,8 @@ namespace LocalNetworkFileShare
                     string received = Encoding.UTF8.GetString(buffer, 0, count);
                     string[] splD = received.Split(":");
                     splSp = splD[1].Split(" ");
-                    sock.Close();
                     commits.Clear();
+                    sock.Close();
                 }
 
             }
@@ -239,6 +239,7 @@ namespace LocalNetworkFileShare
                     catch (Exception) { }
                 }
             }
+            panel4.Controls.Clear();
             int counter = 0;
             int PosY = 10;
             for (int ind = 0; ind < commits.Count; ind++)

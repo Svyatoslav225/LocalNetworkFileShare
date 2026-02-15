@@ -674,7 +674,7 @@ namespace LocalNetworkFileShare
             switch (textSpl[0])
             {
                 case "help":
-                    ConsoleText += "Commands:\n - disconn_dev [device IP] // disconnect device\n - del_comm '[commit name]' // delete commit\n - dev_info '[device name]' // device information\n";
+                    ConsoleText += "Commands:\n - disconn_dev [device IP] // disconnect device\n - del_comm '[commit name]' // delete commit\n - dev_info '[device name]' // device information\n - dis_comms // disable all commits\n - en_comms // enable all commits\n - tot_mem_cln // total memory clean\n";
                     break;
                 case "disconn_dev":
                     DisconnectDevice(textSpl[1]);
@@ -697,8 +697,44 @@ namespace LocalNetworkFileShare
                     }
                     ConsoleText += $"Information about '{splDd[1]}':\n IP: {devices[DeviceIndex].IpAddress};\n Device name: {devices[DeviceIndex].DeviceName};\n";
                     break;
+                case "dis_comms":
+                    ChangeCommitsStatus(false);
+                    ConsoleText += $"All commits were disabled\n";
+                    break;
+                case "en_comms":
+                    ChangeCommitsStatus(true);
+                    ConsoleText += $"All commits were enabled\n";
+                    break;
+                case "tot_mem_cln":
+                    points.Clear();
+                    richTextBox1.Text = "Cleared;";
+                    // in the future i'll add more 
+                    ConsoleText += $"Memory was cleaned\n";
+                    break;
             }
             richTextBox3.Text = ConsoleText;
+        }
+        private async Task ChangeCommitsStatus(bool status)
+        {
+            try
+            {
+                int index = 0;
+                foreach (CommitData comm in CommitsList)
+                {
+                    CommitsList[index].Status = status;
+                    byte[] UpdBuffr = Encoding.UTF8.GetBytes("UPD");
+                    try
+                    {
+                        for (int ind = 0; ind < listeners.Count; ind++)
+                        {
+                            await listeners[ind].SendAsync(UpdBuffr, 0);
+                        }
+                    }
+                    catch (Exception) { }
+                    index++;
+                }
+            }
+            catch (Exception) { }
         }
         private async Task DeleteCommit(string commitName)
         {

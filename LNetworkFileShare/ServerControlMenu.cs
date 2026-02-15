@@ -1037,6 +1037,323 @@ namespace LocalNetworkFileShare
         public string pathToFileInServer = "";
         public bool Status = true;
     }
+    class TEAv2
+    {
+        static EncryptedText EncryptTEAv2s1(string textToEncrypt) // version of TEA with randomized split symbols
+        {
+            EncryptedText Result = new EncryptedText();
+            string[] symbols = new string[] {
+                "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","#","@","%","$","|","*","!","/","^",
+                "1","2","3","4","5","6","7","8","9","0"
+            };
+            string[] keyArr = new string[22];
+            string readyKeyStr = "";
+            for (int ind = 0; ind < 22; ind++) // creating Key
+            {
+                bool DoWhile = true;
+                string symb = "";
+                while (DoWhile)
+                {
+                    bool Error = false;
+                    Random random = new Random();
+                    symb = symbols[random.Next(0, symbols.Length)];
+                    for (int ind2 = 0; ind2 < 22; ind2++)
+                    {
+                        if (keyArr[ind2] == symb)
+                        {
+                            Error = true;
+                            break;
+                        }
+                    }
+                    if (!Error)
+                    {
+                        DoWhile = false;
+                    }
+                }
+                //keyArr[ind] = symb;
+                keyArr[ind] = symb;
+                Result.Key += symb; // writing key into string from result class
+            }
+            readyKeyStr = Result.Key;
+            char[] symbolsArray = textToEncrypt.ToCharArray();
+            string[] SymbolList = new string[] {
+                    "a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v",
+                    "w","x","y","z","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R",
+                    "S","T","U","V","W","X","Y","Z","1","2","3","4","5","6","7","8","9","0",".",",","!",":",
+                    "?","#","@","*","-","=","+","/","а","б","в","г","д","е","ё","ж","з","и","й","к","л","м",
+                    "н","о","п","р","с","т","у","ф","х","ц","ш","щ","ъ","ы","ь","э","ю","я","А","Б","В","Г",
+                    "Д","Е","Ё","Ж","З","И","Й","К","Л","М","Н","О","П","Р","С","Т","У","Ф","Х","Ц","Ш","Щ",
+                    "Ъ","Ы","Ь","Э","Ю","Я"," ","\n"
+                };
+            int index = 0;
+            foreach (char symb in symbolsArray)
+            {
+                int indexInSList = 0;
+                for (int indOfSymb = 0; indOfSymb < SymbolList.Length; indOfSymb++)
+                {
+                    if (symb.ToString() == SymbolList[indOfSymb])
+                    {
+                        indexInSList = indOfSymb;
+                    }
+                }
+                indexInSList++;
+                string BinaryNum = Convert.ToString(indexInSList, 2);
+                char[] splittedBinaryNum = BinaryNum.ToCharArray();
+                string NumInSymbols = "";
+                for (int indexOfNum = 0; indexOfNum < splittedBinaryNum.Length; indexOfNum++)
+                {
+                    switch (splittedBinaryNum[indexOfNum])
+                    {
+                        case '0':
+                            switch (indexOfNum)
+                            {
+                                case 0:
+                                    NumInSymbols += keyArr[0] + keyArr[20];
+                                    break;
+                                case 1:
+                                    NumInSymbols += keyArr[1] + keyArr[20];
+                                    break;
+                                case 2:
+                                    NumInSymbols += keyArr[2] + keyArr[20];
+                                    break;
+                                case 3:
+                                    NumInSymbols += keyArr[3] + keyArr[20];
+                                    break;
+                                case 4:
+                                    NumInSymbols += keyArr[4] + keyArr[20];
+                                    break;
+                                case 5:
+                                    NumInSymbols += keyArr[5] + keyArr[20];
+                                    break;
+                                case 6:
+                                    NumInSymbols += keyArr[6] + keyArr[20];
+                                    break;
+                                case 7:
+                                    NumInSymbols += keyArr[7] + keyArr[20];
+                                    break;
+                                case 8:
+                                    NumInSymbols += keyArr[8] + keyArr[20];
+                                    break;
+                                case 9:
+                                    NumInSymbols += keyArr[9] + keyArr[20];
+                                    break;
+                            }
+                            break;
+                        case '1':
+                            switch (indexOfNum)
+                            {
+                                case 0:
+                                    NumInSymbols += keyArr[10] + keyArr[20];
+                                    break;
+                                case 1:
+                                    NumInSymbols += keyArr[11] + keyArr[20];
+                                    break;
+                                case 2:
+                                    NumInSymbols += keyArr[12] + keyArr[20];
+                                    break;
+                                case 3:
+                                    NumInSymbols += keyArr[13] + keyArr[20];
+                                    break;
+                                case 4:
+                                    NumInSymbols += keyArr[14] + keyArr[20];
+                                    break;
+                                case 5:
+                                    NumInSymbols += keyArr[15] + keyArr[20];
+                                    break;
+                                case 6:
+                                    NumInSymbols += keyArr[16] + keyArr[20];
+                                    break;
+                                case 7:
+                                    NumInSymbols += keyArr[17] + keyArr[20];
+                                    break;
+                                case 8:
+                                    NumInSymbols += keyArr[18] + keyArr[20];
+                                    break;
+                                case 9:
+                                    NumInSymbols += keyArr[19] + keyArr[20];
+                                    break;
+                            }
+                            break;
+                    }
+                }
+                Result.Encrypted += NumInSymbols + keyArr[21];
+            }
+            return Result;
+        }
+
+        static string DecrtyptTEAv2s1(EncryptedText encryptedText)
+        {
+            string Result = "";
+            char[] keySymbolsChr = encryptedText.Key.ToCharArray();
+            string[] keySymbols = new string[22];
+            for (int index = 0; index < 22; index++)
+            {
+                keySymbols[index] = keySymbolsChr[index].ToString();
+            }
+            string[] symbols = encryptedText.Encrypted.Split(keySymbols[21]);
+            foreach (string symb in symbols)
+            {
+                if (symb != null && symb != "" && symb != " ")
+                {
+                    string[] numsInLetters = symb.Split(keySymbols[20]);
+                    List<string> indexes = new List<string>();
+                    string[] SymbolList = new string[] {
+                    "a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v",
+                    "w","x","y","z","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R",
+                    "S","T","U","V","W","X","Y","Z","1","2","3","4","5","6","7","8","9","0",".",",","!",":",
+                    "?","#","@","*","-","=","+","/","а","б","в","г","д","е","ё","ж","з","и","й","к","л","м",
+                    "н","о","п","р","с","т","у","ф","х","ц","ш","щ","ъ","ы","ь","э","ю","я","А","Б","В","Г",
+                    "Д","Е","Ё","Ж","З","И","Й","К","Л","М","Н","О","П","Р","С","Т","У","Ф","Х","Ц","Ш","Щ",
+                    "Ъ","Ы","Ь","Э","Ю","Я"," ","\n"
+                };
+                    string binaryIndexStr = "";
+                    string[] binaryIndexChr = new string[10];
+                    for (int indx = 0; indx < numsInLetters.Length; indx++)
+                    {
+                        if (numsInLetters[indx] != "" && numsInLetters[indx] != " " && numsInLetters[indx] != null)
+                        {
+                            /* switch (numsInLetters[indx])
+                             {
+                                 case :
+
+                                     break;
+                             }*/
+                            if (numsInLetters[indx] == keySymbols[0])
+                            {
+                                binaryIndexChr[0] = "0";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[1])
+                            {
+                                binaryIndexChr[1] = "0";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[2])
+                            {
+                                binaryIndexChr[2] = "0";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[3])
+                            {
+                                binaryIndexChr[3] = "0";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[4])
+                            {
+                                binaryIndexChr[4] = "0";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[5])
+                            {
+                                binaryIndexChr[5] = "0";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[6])
+                            {
+                                binaryIndexChr[6] = "0";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[7])
+                            {
+                                binaryIndexChr[7] = "0";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[8])
+                            {
+                                binaryIndexChr[8] = "0";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[9])
+                            {
+                                binaryIndexChr[9] = "0";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[10])
+                            {
+                                binaryIndexChr[0] = "1";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[11])
+                            {
+                                binaryIndexChr[1] = "1";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[12])
+                            {
+                                binaryIndexChr[2] = "1";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[13])
+                            {
+                                binaryIndexChr[3] = "1";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[14])
+                            {
+                                binaryIndexChr[4] = "1";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[15])
+                            {
+                                binaryIndexChr[5] = "1";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[16])
+                            {
+                                binaryIndexChr[6] = "1";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[17])
+                            {
+                                binaryIndexChr[7] = "1";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[18])
+                            {
+                                binaryIndexChr[8] = "1";
+                            }
+                            else if (numsInLetters[indx] == keySymbols[19])
+                            {
+                                binaryIndexChr[9] = "1";
+                            }
+                        }
+                    }
+                    binaryIndexStr = "";
+                    foreach (string chr in binaryIndexChr)
+                    {
+                        if (chr != null && chr != " ")
+                        {
+                            binaryIndexStr += chr.ToString();
+                        }
+                    }
+                    long DecIndex = Convert.ToInt64(binaryIndexStr, 2);
+                    DecIndex--;
+                    Result += SymbolList[DecIndex];
+                }
+            }
+            return Result;
+        }
+        static EncryptedFile FileToBuffer(byte[] file)
+        {
+            string fileStr = "";
+            for (int ind = 0;ind < file.Length;ind++)
+            {
+                fileStr += file[ind].ToString() + " ";
+            }
+             EncryptedFile fileEnc = new EncryptedFile();
+            EncryptedText text = TEAv2.EncryptTEAv2s1(fileStr);
+            fileEnc.Key = text.Key;
+            fileEnc.fileBuffer = Encoding.UTF8.GetBytes(text.Encrypted);
+            return fileEnc;
+        }
+        static byte[] BufferToFile(EncryptedFile file)
+        {
+            EncryptedText Fileintext = new EncryptedText() { Key = file.Key,Encrypted = Encoding.UTF8.GetString(file.fileBuffer)};
+            string text = TEAv2.DecrtyptTEAv2s1(Fileintext);
+            string[] textSpl = text.Split(" ");
+            byte[] fileInbytes = new byte[textSpl.Length-1];
+            for (int ind = 0; ind < textSpl.Length;ind++)
+            {
+                if(textSpl[ind] != "")
+                {
+                    fileInbytes[ind] = Convert.ToByte(textSpl[ind]);
+                }
+            }
+            return fileInbytes;
+        }
+    }
+    class EncryptedFile
+    {
+        public byte[] fileBuffer;
+        public string Key = "";
+    }
+    class EncryptedText
+    {
+        protected internal string Encrypted = "";
+        protected internal string Key = "";
+    }
 }
 
 /*

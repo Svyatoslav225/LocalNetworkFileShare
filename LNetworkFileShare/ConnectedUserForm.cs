@@ -396,7 +396,7 @@ namespace LocalNetworkFileShare
 
         private void richTextBox1_MouseClick(object sender, MouseEventArgs e)
         {
-            MessageBox.Show("This logger isn't completely done :(", "info");
+            //MessageBox.Show("This logger isn't completely done :(", "info");
         }
 
         private void button3_Click(object sender, EventArgs e)

@@ -180,7 +180,6 @@
             checkBox4.TabIndex = 12;
             checkBox4.Text = "TEA-v2";
             checkBox4.UseVisualStyleBackColor = true;
-            checkBox4.Visible = false;
             checkBox4.CheckedChanged += checkBox4_CheckedChanged;
             // 
             // ServerOptions

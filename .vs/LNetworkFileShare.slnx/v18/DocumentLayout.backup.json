@@ -3,32 +3,32 @@
   "WorkspaceRootPath": "D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|d:\\ffr\\ffr_projects_code\\ffr_cs\\lnetworkfileshare\\lnetworkfileshare\\servercontrolmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|solutionrelative:lnetworkfileshare\\servercontrolmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|d:\\ffr\\ffr_projects_code\\ffr_cs\\lnetworkfileshare\\lnetworkfileshare\\servercontrolmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|solutionrelative:lnetworkfileshare\\servercontrolmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|d:\\ffr\\ffr_projects_code\\ffr_cs\\lnetworkfileshare\\lnetworkfileshare\\connecteduserform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|solutionrelative:lnetworkfileshare\\connecteduserform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\lnetworkfileshare\\connecteduserform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|solutionrelative:lnetworkfileshare\\connecteduserform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|d:\\ffr\\ffr_projects_code\\ffr_cs\\lnetworkfileshare\\lnetworkfileshare\\servercontrolmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|solutionrelative:lnetworkfileshare\\servercontrolmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|d:\\ffr\\ffr_projects_code\\ffr_cs\\lnetworkfileshare\\lnetworkfileshare\\mainmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|solutionrelative:lnetworkfileshare\\mainmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\lnetworkfileshare\\mainmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|solutionrelative:lnetworkfileshare\\mainmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|d:\\ffr\\ffr_projects_code\\ffr_cs\\lnetworkfileshare\\lnetworkfileshare\\serveroptions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|solutionrelative:lnetworkfileshare\\serveroptions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|d:\\ffr\\ffr_projects_code\\ffr_cs\\lnetworkfileshare\\lnetworkfileshare\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|solutionrelative:lnetworkfileshare\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|d:\\ffr\\ffr_projects_code\\ffr_cs\\lnetworkfileshare\\lnetworkfileshare\\servercontrolmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|solutionrelative:lnetworkfileshare\\servercontrolmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\lnetworkfileshare\\connecteduserform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|solutionrelative:lnetworkfileshare\\connecteduserform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\lnetworkfileshare\\mainmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|solutionrelative:lnetworkfileshare\\mainmenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
       "AbsoluteMoniker": "D:0:0:{4C327621-4D29-4D43-C521-D32BE903A382}|LNetworkFileShare\\LNetworkFileShare.csproj|d:\\ffr\\ffr_projects_code\\ffr_cs\\lnetworkfileshare\\lnetworkfileshare\\lnetworkfileshare.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
@@ -42,7 +42,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 94,
-          "SelectedChildIndex": 9,
+          "SelectedChildIndex": 10,
           "Children": [
             {
               "$type": "Bookmark",
@@ -89,39 +89,39 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "ServerControlMenu.cs",
               "DocumentMoniker": "D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\LNetworkFileShare\\ServerControlMenu.cs",
               "RelativeDocumentMoniker": "LNetworkFileShare\\ServerControlMenu.cs",
               "ToolTip": "D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\LNetworkFileShare\\ServerControlMenu.cs",
               "RelativeToolTip": "LNetworkFileShare\\ServerControlMenu.cs",
-              "ViewState": "AgIAAI8CAAAAAAAAAAAswMYCAAAzAAAAAAAAAA==",
+              "ViewState": "AgIAAPYBAAAAAAAAAAAAwBcCAAA1AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-01-30T16:29:30.585Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "ConnectedUserForm.cs",
               "DocumentMoniker": "D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\LNetworkFileShare\\ConnectedUserForm.cs",
               "RelativeDocumentMoniker": "LNetworkFileShare\\ConnectedUserForm.cs",
               "ToolTip": "D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\LNetworkFileShare\\ConnectedUserForm.cs",
               "RelativeToolTip": "LNetworkFileShare\\ConnectedUserForm.cs",
-              "ViewState": "AgIAAFoAAAAAAAAAAAAYwIoAAAAnAAAAAAAAAA==",
+              "ViewState": "AgIAANMBAAAAAAAAAAAQwAICAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-03T16:23:46.083Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 2,
               "Title": "MainMenu.cs",
               "DocumentMoniker": "D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\LNetworkFileShare\\MainMenu.cs",
               "RelativeDocumentMoniker": "LNetworkFileShare\\MainMenu.cs",
               "ToolTip": "D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\LNetworkFileShare\\MainMenu.cs",
               "RelativeToolTip": "LNetworkFileShare\\MainMenu.cs",
-              "ViewState": "AgIAAHoAAAAAAAAAAAAgwH0AAAAEAAAAAAAAAA==",
+              "ViewState": "AgIAADwAAAAAAAAAAAAYwH0AAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-09T17:26:36.021Z",
               "EditorCaption": ""
@@ -130,11 +130,11 @@
         },
         {
           "DockedWidth": 124,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "MainMenu.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
               "DocumentMoniker": "D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\LNetworkFileShare\\MainMenu.cs",
               "RelativeDocumentMoniker": "LNetworkFileShare\\MainMenu.cs",
@@ -145,7 +145,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "ServerControlMenu.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
               "DocumentMoniker": "D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\LNetworkFileShare\\ServerControlMenu.cs",
               "RelativeDocumentMoniker": "LNetworkFileShare\\ServerControlMenu.cs",
@@ -157,7 +157,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "ConnectedUserForm.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
               "DocumentMoniker": "D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\LNetworkFileShare\\ConnectedUserForm.cs",
               "RelativeDocumentMoniker": "LNetworkFileShare\\ConnectedUserForm.cs",
@@ -168,15 +168,15 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\LNetworkFileShare\\Program.cs",
-              "RelativeDocumentMoniker": "LNetworkFileShare\\Program.cs",
-              "ToolTip": "D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\LNetworkFileShare\\Program.cs",
-              "RelativeToolTip": "LNetworkFileShare\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACQAAAA7AAAAAAAAAA==",
+              "DocumentIndex": 3,
+              "Title": "ServerOptions.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
+              "DocumentMoniker": "D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\LNetworkFileShare\\ServerOptions.cs",
+              "RelativeDocumentMoniker": "LNetworkFileShare\\ServerOptions.cs",
+              "ToolTip": "D:\\FFR\\FFR_Projects_Code\\FFR_CS\\LNetworkFileShare\\LNetworkFileShare\\ServerOptions.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
+              "RelativeToolTip": "LNetworkFileShare\\ServerOptions.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-13T16:23:32.672Z"
+              "WhenOpened": "2026-02-17T16:39:27.502Z",
+              "EditorCaption": " [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]"
             }
           ]
         }

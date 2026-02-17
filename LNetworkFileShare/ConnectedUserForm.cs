@@ -24,7 +24,7 @@ namespace LocalNetworkFileShare
         public string EncodingStr = "";
         Socket MainListener;
         List<CommitData> commits = new List<CommitData>();
-        List<CommitCard> commitsVisual = new List<CommitCard>();
+      //  List<CommitCard> commitsVisual = new List<CommitCard>();
         public ConnectedUserForm()
         {
             InitializeComponent();
@@ -246,18 +246,18 @@ namespace LocalNetworkFileShare
             {
                 if (counter == 2)
                 {
-                    CommitCard card = new CommitCard(new Point(490, PosY), panel4, commits[ind].CommitName, commits[ind].bytesInFile.ToString() + " bytes") { CommitId = commits[ind].CommitID, ServerIP = ServerIP, Port = Port };
+                    CommitCard card = new CommitCard(new Point(490, PosY), panel4, commits[ind].CommitName, commits[ind].bytesInFile.ToString() + " bytes") { CommitId = commits[ind].CommitID, ServerIP = ServerIP, Port = Port, encoding = EncodingStr };
                     PosY += 150;
                     counter = 0;
                 }
                 else if (counter == 0)
                 {
-                    CommitCard card = new CommitCard(new Point(10, PosY), panel4, commits[ind].CommitName, commits[ind].bytesInFile.ToString() + " bytes") { CommitId = commits[ind].CommitID, ServerIP = ServerIP, Port = Port };
+                    CommitCard card = new CommitCard(new Point(10, PosY), panel4, commits[ind].CommitName, commits[ind].bytesInFile.ToString() + " bytes") { CommitId = commits[ind].CommitID, ServerIP = ServerIP, Port = Port, encoding = EncodingStr };
                     counter++;
                 }
                 else if (counter == 1)
                 {
-                    CommitCard card = new CommitCard(new Point(250, PosY), panel4, commits[ind].CommitName, commits[ind].bytesInFile.ToString() + " bytes") { CommitId = commits[ind].CommitID, ServerIP = ServerIP, Port = Port };
+                    CommitCard card = new CommitCard(new Point(250, PosY), panel4, commits[ind].CommitName, commits[ind].bytesInFile.ToString() + " bytes") { CommitId = commits[ind].CommitID, ServerIP = ServerIP, Port = Port, encoding = EncodingStr };
                     counter++;
                 }
 
@@ -316,24 +316,49 @@ namespace LocalNetworkFileShare
             IPAddress addr = IPAddress.Parse(ServerIP);
             using (Socket sock = new Socket(addr.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
             {
-                try
-                {
-                    await sock.ConnectAsync(addr, Port);
-                    byte[] buffer = File.ReadAllBytes(textBox1.Text);
-                    string[] fSpl = textBox1.Text.Split(".");
-                    byte[] buff = Encoding.UTF8.GetBytes($"UFTS:{buffer.Length}:15:{fSpl[1]}:{textBox2.Text}");
-                    await sock.SendAsync(buff, 0);
-                    byte[] buffRec = new byte[512];
-                    int count = await sock.ReceiveAsync(buffRec, 0);
-                    string txtRec = Encoding.UTF8.GetString(buffRec, 0, count);
-                    if (txtRec == "RD")
+                if (EncodingStr == "UTF-8") {
+                    try
                     {
-                        await sock.SendAsync(buffer, 0);
+                        await sock.ConnectAsync(addr, Port);
+                        byte[] buffer = File.ReadAllBytes(textBox1.Text);
+                        string[] fSpl = textBox1.Text.Split(".");
+                        byte[] buff = Encoding.UTF8.GetBytes($"UFTS:{buffer.Length}:15:{fSpl[1]}:{textBox2.Text}");
+                        await sock.SendAsync(buff, 0);
+                        byte[] buffRec = new byte[512];
+                        int count = await sock.ReceiveAsync(buffRec, 0);
+                        string txtRec = Encoding.UTF8.GetString(buffRec, 0, count);
+                        if (txtRec == "RD")
+                        {
+                            await sock.SendAsync(buffer, 0);
+                        }
+                        buffer = new byte[0];
+                        sock.Close();
                     }
-                    buffer = new byte[0];
-                    sock.Close();
-                }
-                catch (Exception) { MessageBox.Show("File uploading exception", "Error", MessageBoxButtons.OK); }
+                    catch (Exception) { MessageBox.Show("File uploading exception", "Error", MessageBoxButtons.OK); }
+                }else if (EncodingStr == "TEA-v2")
+                {
+                    try
+                    {
+                        await sock.ConnectAsync(addr, Port);
+                        byte[] bufferF = File.ReadAllBytes(textBox1.Text);
+                        EncryptedFile buffer = TEAv2.FileToBuffer(bufferF);
+                        string[] fSpl = textBox1.Text.Split(".");
+                        byte[] buff = Encoding.UTF8.GetBytes($"UFTS:{buffer.fileBuffer.Length}:15:{fSpl[1]}:{textBox2.Text}");
+                        await sock.SendAsync(buff, 0);
+                        byte[] KeyBuff = Encoding.UTF8.GetBytes(buffer.Key);
+                        await sock.SendAsync(KeyBuff,0);
+                        byte[] buffRec = new byte[512];
+                        int count = await sock.ReceiveAsync(buffRec, 0);
+                        string txtRec = Encoding.UTF8.GetString(buffRec, 0, count);
+                        if (txtRec == "RD")
+                        {
+                            await sock.SendAsync(buffer.fileBuffer, 0);
+                        }
+                        buffer = null;
+                        sock.Close();
+                    }
+                    catch (Exception) { }
+                }         
             }
         }
         private void button1_MouseClick(object sender, MouseEventArgs e)
@@ -414,6 +439,7 @@ namespace LocalNetworkFileShare
         public string CommitId = "";
         public string ServerIP = "";
         public int Port = 0;
+        public string encoding = "";
         public CommitCard(Point Location,Control par, string CommitName, string Weight)
         {
             Panel backGround = new Panel() { Parent = par,BackColor = Color.White,Location = Location,Size = new Size(210,100)};
@@ -434,28 +460,53 @@ namespace LocalNetworkFileShare
             string path = Interaction.InputBox("Path to save:", "Saving");
             try
             {
-                IPAddress addr = IPAddress.Parse(ServerIP);
-                using (Socket sock = new Socket(addr.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
-                {
-                    await sock.ConnectAsync(addr,Port);
-                    byte[] buffer1 = Encoding.UTF8.GetBytes($"GFFS:{CommitId}");
-                    await sock.SendAsync(buffer1,0);
-                    byte[] buffer2 = new byte[1024];
-                    int count = await sock.ReceiveAsync(buffer2,0);
-                    string rec1 = Encoding.UTF8.GetString(buffer2,0,count);
-                    string[] recSpl = rec1.Split(":");
-                    byte[] bufferRec = new byte[Convert.ToInt32(recSpl[1])];
-                    try
+                if (path != "") {
+                    IPAddress addr = IPAddress.Parse(ServerIP);
+                    using (Socket sock = new Socket(addr.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
                     {
-                        for (int counts = 0; counts <= Convert.ToInt32(recSpl[2]); counts++)
+                        await sock.ConnectAsync(addr, Port);
+                        byte[] buffer1 = Encoding.UTF8.GetBytes($"GFFS:{CommitId}");
+                        await sock.SendAsync(buffer1, 0);
+                        byte[] buffer2 = new byte[1024];
+                        int count = await sock.ReceiveAsync(buffer2, 0);
+                        string rec1 = Encoding.UTF8.GetString(buffer2, 0, count);
+                        string[] recSpl = rec1.Split(":");
+                        byte[] bufferRec = new byte[Convert.ToInt32(recSpl[1])];
+                        if (encoding == "UTF-8") {
+                            try
+                            {
+                                for (int counts = 0; counts <= Convert.ToInt32(recSpl[2]); counts++)
+                                {
+                                    int countT = await sock.ReceiveAsync(bufferRec, 0);
+                                    sock.Close();
+                                }
+                            }
+                            catch (Exception ex) { /*MessageBox.Show(ex.Message);*/ }
+                        } else if (encoding == "TEA-v2")
                         {
-                            int countT = await sock.ReceiveAsync(bufferRec, 0);
-                            sock.Close();
+
+                            byte[] KeyBuff = new byte[1024];
+                            int countS = await sock.ReceiveAsync(KeyBuff, 0);
+                            string keyStr = Encoding.UTF8.GetString(KeyBuff, 0, countS);
+                            try
+                            {
+                                for (int counts = 0; counts <= Convert.ToInt32(recSpl[2]); counts++)
+                                {
+                                    int countT = await sock.ReceiveAsync(bufferRec, 0);
+                                    sock.Close();
+                                }
+                            }
+                            catch (Exception ex) { /*MessageBox.Show(ex.Message);*/ }
+                            try
+                            {
+                                EncryptedFile file = new EncryptedFile() { Key = keyStr, fileBuffer = bufferRec };
+                                bufferRec = TEAv2.BufferToFile(file);
+                                file = null;
+                            } catch (Exception) { }
                         }
+                        File.WriteAllBytes($"{path}.{recSpl[3]}", bufferRec);
+                        bufferRec = new byte[0];
                     }
-                    catch (Exception ex) { /*MessageBox.Show(ex.Message);*/ }
-                    File.WriteAllBytes($"{path}.{recSpl[3]}",bufferRec);
-                    bufferRec= new byte[0];  
                 }
             }
             catch (Exception) { }

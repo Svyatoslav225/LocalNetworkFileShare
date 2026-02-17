@@ -416,44 +416,97 @@ namespace LocalNetworkFileShare
                             await handler.SendAsync(buffrF, 0);
                             break;
                         case "UFTS":
-                            byte[] ansBuff = Encoding.UTF8.GetBytes("RD");
-                            await handler.SendAsync(ansBuff, 0);
-                            byte[] buffRec = new byte[Convert.ToInt32(DoublePointSplitted[1])];
-                            for (int count = 0; count <= Convert.ToInt32(DoublePointSplitted[2]); count++)
-                            {
-                                await handler.ReceiveAsync(buffRec, 0);
-                            }
-                            CommitData data = new CommitData();
-                            data.CommitID = CommitsList.Count.ToString();
-                            data.bytesInFile = buffRec.Length;
-                            data.CommitName = DoublePointSplitted[4];
-                            data.pathToFileInServer = AppDomain.CurrentDomain.BaseDirectory + $@"\ServerData\Commit{data.CommitID}.{DoublePointSplitted[3]}";
-                            CommitsList.Add(data);
-                            serverWeight += data.bytesInFile;
-                            label13.Text = $"Server weight:\n {serverWeight} bytes";
-                            DateTime timeH = DateTime.Now;
-                            richTextBox1.Text += $"{timeH.Hour}h:{timeH.Minute}m:{timeH.Second}s >> User uploaded file to server ({serverWeight.ToString()} bytes);\n";
-                            if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\"))
-                            {
-                                Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\");
-                                File.WriteAllBytes(data.pathToFileInServer, buffRec);
-                            }
-                            else
-                            {
-                                File.WriteAllBytes(data.pathToFileInServer, buffRec);
-                            }
-                            byte[] UpdBuffr = Encoding.UTF8.GetBytes("UPD");
-                            try
-                            {
-                                for (int ind = 0; ind < listeners.Count; ind++)
+                            if (serverinfo.Encoding == 0) {
+                                byte[] ansBuff = Encoding.UTF8.GetBytes("RD");
+                                await handler.SendAsync(ansBuff, 0);
+                                byte[] buffRec = new byte[Convert.ToInt32(DoublePointSplitted[1])];
+                                for (int count = 0; count <= Convert.ToInt32(DoublePointSplitted[2]); count++)
                                 {
-                                    await listeners[ind].SendAsync(UpdBuffr, 0);
+                                    await handler.ReceiveAsync(buffRec, 0);
                                 }
-                            }
-                            catch (Exception) { }
+                                CommitData data = new CommitData();
+                                data.CommitID = CommitsList.Count.ToString();
+                                data.bytesInFile = buffRec.Length;
+                                data.CommitName = DoublePointSplitted[4];
+                                data.pathToFileInServer = AppDomain.CurrentDomain.BaseDirectory + $@"\ServerData\Commit{data.CommitID}.{DoublePointSplitted[3]}";
+                                CommitsList.Add(data);
+                                serverWeight += data.bytesInFile;
+                                label13.Text = $"Server weight:\n {serverWeight} bytes";
+                                DateTime timeH = DateTime.Now;
+                                richTextBox1.Text += $"{timeH.Hour}h:{timeH.Minute}m:{timeH.Second}s >> User uploaded file to server ({serverWeight.ToString()} bytes);\n";
+                                if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\"))
+                                {
+                                    Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\");
+                                    File.WriteAllBytes(data.pathToFileInServer, buffRec);
+                                }
+                                else
+                                {
+                                    File.WriteAllBytes(data.pathToFileInServer, buffRec);
+                                }
+                                byte[] UpdBuffr = Encoding.UTF8.GetBytes("UPD");
+                                try
+                                {
+                                    for (int ind = 0; ind < listeners.Count; ind++)
+                                    {
+                                        await listeners[ind].SendAsync(UpdBuffr, 0);
+                                    }
+                                }
+                                catch (Exception) { }
 
-                            ansBuff = new byte[0];
-                            buffRec = new byte[0];
+                                ansBuff = new byte[0];
+                                buffRec = new byte[0];
+                            }else if (serverinfo.Encoding == 1)
+                            {
+                                byte[] ansBuff = Encoding.UTF8.GetBytes("RD");
+                                byte[] KeyBuffer = new byte[1024];
+                                int countk = await handler.ReceiveAsync(KeyBuffer,0);
+                                string Key = Encoding.UTF8.GetString(KeyBuffer,0,countk);
+                                byte[] buffRecB = new byte[Convert.ToInt32(DoublePointSplitted[1])];
+                                await handler.SendAsync(ansBuff, 0);
+                                for (int count = 0; count <= Convert.ToInt32(DoublePointSplitted[2]); count++)
+                                {
+                                    await handler.ReceiveAsync(buffRecB, 0);
+                                }
+                                byte[] buffRec = new byte[0];
+                                try
+                                {
+                                    EncryptedFile fEnc = new EncryptedFile() { fileBuffer = buffRecB, Key = Key };
+                                    buffRec = TEAv2.BufferToFile(fEnc);
+                                    fEnc = null;
+                                }
+                                catch (Exception) { }
+                                CommitData data = new CommitData();
+                                data.CommitID = CommitsList.Count.ToString();
+                                data.bytesInFile = buffRec.Length;
+                                data.CommitName = DoublePointSplitted[4];
+                                data.pathToFileInServer = AppDomain.CurrentDomain.BaseDirectory + $@"\ServerData\Commit{data.CommitID}.{DoublePointSplitted[3]}";
+                                CommitsList.Add(data);
+                                serverWeight += data.bytesInFile;
+                                label13.Text = $"Server weight:\n {serverWeight} bytes";
+                                DateTime timeH = DateTime.Now;
+                                richTextBox1.Text += $"{timeH.Hour}h:{timeH.Minute}m:{timeH.Second}s >> User uploaded file to server ({serverWeight.ToString()} bytes);\n";
+                                if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\"))
+                                {
+                                    Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\");
+                                    File.WriteAllBytes(data.pathToFileInServer, buffRec);
+                                }
+                                else
+                                {
+                                    File.WriteAllBytes(data.pathToFileInServer, buffRec);
+                                }
+                                byte[] UpdBuffr = Encoding.UTF8.GetBytes("UPD");
+                                try
+                                {
+                                    for (int ind = 0; ind < listeners.Count; ind++)
+                                    {
+                                        await listeners[ind].SendAsync(UpdBuffr, 0);
+                                    }
+                                }
+                                catch (Exception) { }
+
+                                ansBuff = new byte[0];
+                                buffRec = new byte[0];
+                            }
                             /*      for (int index = 0;index < devices.Count;index++)
                                   {
 
@@ -462,13 +515,32 @@ namespace LocalNetworkFileShare
                         case "GFFS":
                             try
                             {
-                                byte[] FileBuffer = File.ReadAllBytes(CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer);
-                                string[] spl = CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer.Split(".");
-                                byte[] bufferF = Encoding.UTF8.GetBytes($"GFFS:{FileBuffer.Length}:15:{spl[2]}");
-                                await handler.SendAsync(bufferF, 0);
-                                await handler.SendAsync(FileBuffer, 0);
-                                DateTime timeI = DateTime.Now;
-                                richTextBox1.Text += $"{timeI.Hour}h:{timeI.Minute}m:{timeI.Second}s >> User downloaded file from server ({FileBuffer.Length} bytes);\n";
+                                if (serverinfo.Encoding == 0) {
+                                    byte[] FileBuffer = File.ReadAllBytes(CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer);
+                                    string[] spl = CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer.Split(".");
+                                    byte[] bufferF = Encoding.UTF8.GetBytes($"GFFS:{FileBuffer.Length}:15:{spl[2]}");
+                                    await handler.SendAsync(bufferF, 0);
+                                    await handler.SendAsync(FileBuffer, 0);
+                                    DateTime timeI = DateTime.Now;
+                                    richTextBox1.Text += $"{timeI.Hour}h:{timeI.Minute}m:{timeI.Second}s >> User downloaded file from server ({FileBuffer.Length} bytes);\n";
+                                    FileBuffer = new byte[0];
+                                }
+                                else if (serverinfo.Encoding == 1)
+                                {
+                                    byte[] FileBuffer = File.ReadAllBytes(CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer);
+                                    EncryptedFile encF = TEAv2.FileToBuffer(FileBuffer);
+                                    string[] spl = CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer.Split(".");
+                                    byte[] bufferF = Encoding.UTF8.GetBytes($"GFFS:{encF.fileBuffer.Length}:15:{spl[2]}");
+                                    await handler.SendAsync(bufferF, 0);
+                                    byte[] keyBuff = Encoding.UTF8.GetBytes(encF.Key);
+                                    Thread.Sleep(10);
+                                    await handler.SendAsync(keyBuff,0);
+                                    await handler.SendAsync(encF.fileBuffer, 0);
+                                    DateTime timeI = DateTime.Now;
+                                    FileBuffer = new byte[0];
+                                    richTextBox1.Text += $"{timeI.Hour}h:{timeI.Minute}m:{timeI.Second}s >> User downloaded file from server ({encF.fileBuffer.Length} bytes);\n";
+                                    encF = null;
+                                }  
                             }catch (Exception) { }
                             break;
                         case "GACI":
@@ -1039,7 +1111,7 @@ namespace LocalNetworkFileShare
     }
     class TEAv2
     {
-        static EncryptedText EncryptTEAv2s1(string textToEncrypt) // version of TEA with randomized split symbols
+        public static EncryptedText EncryptTEAv2s1(string textToEncrypt) // version of TEA with randomized split symbols
         {
             EncryptedText Result = new EncryptedText();
             string[] symbols = new string[] {
@@ -1181,7 +1253,7 @@ namespace LocalNetworkFileShare
             return Result;
         }
 
-        static string DecrtyptTEAv2s1(EncryptedText encryptedText)
+        public static string DecrtyptTEAv2s1(EncryptedText encryptedText)
         {
             string Result = "";
             char[] keySymbolsChr = encryptedText.Key.ToCharArray();
@@ -1315,7 +1387,7 @@ namespace LocalNetworkFileShare
             }
             return Result;
         }
-        static EncryptedFile FileToBuffer(byte[] file)
+        public static EncryptedFile FileToBuffer(byte[] file)
         {
             string fileStr = "";
             for (int ind = 0;ind < file.Length;ind++)
@@ -1328,7 +1400,7 @@ namespace LocalNetworkFileShare
             fileEnc.fileBuffer = Encoding.UTF8.GetBytes(text.Encrypted);
             return fileEnc;
         }
-        static byte[] BufferToFile(EncryptedFile file)
+        public static byte[] BufferToFile(EncryptedFile file)
         {
             EncryptedText Fileintext = new EncryptedText() { Key = file.Key,Encrypted = Encoding.UTF8.GetString(file.fileBuffer)};
             string text = TEAv2.DecrtyptTEAv2s1(Fileintext);

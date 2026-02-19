@@ -37,7 +37,9 @@ namespace LocalNetworkFileShare
         bool autoSaving = false;
         bool isServerPaused = false;
         public bool IsClassExist = true;
-
+        List<Socket> connectedSockets = new List<Socket>();
+        List<IPAddress> BannedIPs = new List<IPAddress>();
+        public bool tryer = false;
         public ServerControlMenu()
         {
             InitializeComponent();
@@ -342,258 +344,541 @@ namespace LocalNetworkFileShare
             label9.Text = "Port: " + endP.Port;
             while (true)
             {
-                var handler = await MainListener.AcceptAsync();
-                if (isServerPaused)
-                { handler.Close(); }
-                else
+                try
                 {
-                    ConnectionsNum++;
-                    label12.Text = ConnectionsNum.ToString();
-                    byte[] buffer = new byte[2048];
-                    int received = await handler.ReceiveAsync(buffer, 0);
-                    string responce = Encoding.UTF8.GetString(buffer, 0, received);
-                    string[] DoublePointSplitted = responce.Split(":");
-                    switch (DoublePointSplitted[0])
+                    var handler = await MainListener.AcceptAsync();
+                    connectedSockets.Add(handler);
+                    if (isServerPaused)
+                    { handler.Close();}
+                    else
                     {
-                        case "ADTSL":
-                            if (serverinfo.type == 0)
-                            {
-                                byte[] buffr = Encoding.UTF8.GetBytes(serverinfo.ServerName);
-                                await handler.SendAsync(buffr, 0);
-                                DateTime timeA = DateTime.Now;
-                                richTextBox1.Text += $"{timeA.Hour}h:{timeA.Minute}m:{timeA.Second}s >> ADTSL request received => accept;\n";
-                            }
-                            else
-                            {
-                                byte[] buffr = Encoding.UTF8.GetBytes("SIP"); // server is private
-                                await handler.SendAsync(buffr, 0);
-                                DateTime timeS = DateTime.Now;
-                                richTextBox1.Text += $"{timeS.Hour}h:{timeS.Minute}m:{timeS.Second}s >> ADTSL request received => denied;\n";
-                            }
-                            break;
-                        case "CNUPu":
-                            ConnectedDevice device = new ConnectedDevice();
-                            device.DeviceName = DoublePointSplitted[1];
-                            IPEndPoint remoteEndPoint = (IPEndPoint)handler.RemoteEndPoint;
-                            IPAddress deviceAddr = remoteEndPoint.Address;
-                            device.IpAddress = deviceAddr.ToString();
-                            devices.Add(device);
-                            refreshDevicesList();
-                            DateTime time = DateTime.Now;
-                            richTextBox1.Text += $"{time.Hour}h:{time.Minute}m:{time.Second}s >> Connected new user: {device.DeviceName};\n";
-                            byte[] buffrS = Encoding.UTF8.GetBytes("AG"); // access granted
-                            await handler.SendAsync(buffrS, 0);
+                        IPEndPoint remoteIp = (IPEndPoint)handler.RemoteEndPoint;
+                        IPAddress adr = remoteIp.Address;
+                        bool isBanned = false;
+                        for (int ind = 0; ind < BannedIPs.Count; ind++)
+                        {
+                            if (adr.ToString() == BannedIPs[ind].ToString()) { isBanned = true; handler.Close(); }
+                        }
+                        if (checkBox2.Checked == true && !isBanned)
+                        {
                             ConnectionsNum++;
                             label12.Text = ConnectionsNum.ToString();
-                            break;
-                        case "CNUPr":
-                            if (DoublePointSplitted[2].Replace(" ", "") == serverinfo.Password.Replace(" ", ""))
+                            byte[] buffer = new byte[2048];
+                            int received = await handler.ReceiveAsync(buffer, 0);
+                            string responce = Encoding.UTF8.GetString(buffer, 0, received);
+                            string[] DoublePointSplitted = responce.Split(":");
+                            switch (DoublePointSplitted[0])
                             {
-                                ConnectedDevice deviceS = new ConnectedDevice();
-                                deviceS.DeviceName = DoublePointSplitted[1];
-                                IPEndPoint remoteEndPointS = (IPEndPoint)handler.RemoteEndPoint;
-                                IPAddress deviceAddrS = remoteEndPointS.Address;
-                                deviceS.IpAddress = deviceAddrS.ToString();
-                                devices.Add(deviceS);
-                                refreshDevicesList();
-                                DateTime timeD = DateTime.Now;
-                                richTextBox1.Text += $"{timeD.Hour}h:{timeD.Minute}m:{timeD.Second}s >> Connected new user: {deviceS.DeviceName};\n";
-                                byte[] buffrT = Encoding.UTF8.GetBytes("AG"); // access granted
-                                await handler.SendAsync(buffrT, 0);
-                                ConnectionsNum++;
-                                label12.Text = ConnectionsNum.ToString();
-                            }
-                            else
-                            {
-                                byte[] buffrT = Encoding.UTF8.GetBytes("AD"); // access denied
-                                await handler.SendAsync(buffrT, 0);
-                            }
-                            break;
-                        case "GCSI":
-                            byte[] buffrF = Encoding.UTF8.GetBytes($"SCSI:{serverinfo.ServerName}:{serverinfo.Encoding}:{serverinfo.type}");
-                            DateTime timeG = DateTime.Now;
-                            richTextBox1.Text += $"{timeG.Hour}h:{timeG.Minute}m:{timeG.Second}s >> Information about server requested => accept;\n";
-                            await handler.SendAsync(buffrF, 0);
-                            break;
-                        case "UFTS":
-                            if (serverinfo.Encoding == 0) {
-                                byte[] ansBuff = Encoding.UTF8.GetBytes("RD");
-                                await handler.SendAsync(ansBuff, 0);
-                                byte[] buffRec = new byte[Convert.ToInt32(DoublePointSplitted[1])];
-                                for (int count = 0; count <= Convert.ToInt32(DoublePointSplitted[2]); count++)
-                                {
-                                    await handler.ReceiveAsync(buffRec, 0);
-                                }
-                                CommitData data = new CommitData();
-                                data.CommitID = CommitsList.Count.ToString();
-                                data.bytesInFile = buffRec.Length;
-                                data.CommitName = DoublePointSplitted[4];
-                                data.pathToFileInServer = AppDomain.CurrentDomain.BaseDirectory + $@"\ServerData\Commit{data.CommitID}.{DoublePointSplitted[3]}";
-                                CommitsList.Add(data);
-                                serverWeight += data.bytesInFile;
-                                label13.Text = $"Server weight:\n {serverWeight} bytes";
-                                DateTime timeH = DateTime.Now;
-                                richTextBox1.Text += $"{timeH.Hour}h:{timeH.Minute}m:{timeH.Second}s >> User uploaded file to server ({serverWeight.ToString()} bytes);\n";
-                                if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\"))
-                                {
-                                    Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\");
-                                    File.WriteAllBytes(data.pathToFileInServer, buffRec);
-                                }
-                                else
-                                {
-                                    File.WriteAllBytes(data.pathToFileInServer, buffRec);
-                                }
-                                byte[] UpdBuffr = Encoding.UTF8.GetBytes("UPD");
-                                try
-                                {
-                                    for (int ind = 0; ind < listeners.Count; ind++)
+                                case "ADTSL":
+                                    if (serverinfo.type == 0)
                                     {
-                                        await listeners[ind].SendAsync(UpdBuffr, 0);
+                                        byte[] buffr = Encoding.UTF8.GetBytes(serverinfo.ServerName);
+                                        await handler.SendAsync(buffr, 0);
+                                        DateTime timeA = DateTime.Now;
+                                        richTextBox1.Text += $"{timeA.Hour}h:{timeA.Minute}m:{timeA.Second}s >> ADTSL request received => accept;\n";
                                     }
-                                }
-                                catch (Exception) { }
-
-                                ansBuff = new byte[0];
-                                buffRec = new byte[0];
-                            }else if (serverinfo.Encoding == 1)
-                            {
-                                byte[] ansBuff = Encoding.UTF8.GetBytes("RD");
-                                byte[] KeyBuffer = new byte[1024];
-                                int countk = await handler.ReceiveAsync(KeyBuffer,0);
-                                string Key = Encoding.UTF8.GetString(KeyBuffer,0,countk);
-                                byte[] buffRecB = new byte[Convert.ToInt32(DoublePointSplitted[1])];
-                                await handler.SendAsync(ansBuff, 0);
-                                for (int count = 0; count <= Convert.ToInt32(DoublePointSplitted[2]); count++)
-                                {
-                                    await handler.ReceiveAsync(buffRecB, 0);
-                                }
-                                byte[] buffRec = new byte[0];
-                                try
-                                {
-                                    EncryptedFile fEnc = new EncryptedFile() { fileBuffer = buffRecB, Key = Key };
-                                    buffRec = TEAv2.BufferToFile(fEnc);
-                                    fEnc = null;
-                                }
-                                catch (Exception) { }
-                                CommitData data = new CommitData();
-                                data.CommitID = CommitsList.Count.ToString();
-                                data.bytesInFile = buffRec.Length;
-                                data.CommitName = DoublePointSplitted[4];
-                                data.pathToFileInServer = AppDomain.CurrentDomain.BaseDirectory + $@"\ServerData\Commit{data.CommitID}.{DoublePointSplitted[3]}";
-                                CommitsList.Add(data);
-                                serverWeight += data.bytesInFile;
-                                label13.Text = $"Server weight:\n {serverWeight} bytes";
-                                DateTime timeH = DateTime.Now;
-                                richTextBox1.Text += $"{timeH.Hour}h:{timeH.Minute}m:{timeH.Second}s >> User uploaded file to server ({serverWeight.ToString()} bytes);\n";
-                                if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\"))
-                                {
-                                    Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\");
-                                    File.WriteAllBytes(data.pathToFileInServer, buffRec);
-                                }
-                                else
-                                {
-                                    File.WriteAllBytes(data.pathToFileInServer, buffRec);
-                                }
-                                byte[] UpdBuffr = Encoding.UTF8.GetBytes("UPD");
-                                try
-                                {
-                                    for (int ind = 0; ind < listeners.Count; ind++)
+                                    else
                                     {
-                                        await listeners[ind].SendAsync(UpdBuffr, 0);
+                                        byte[] buffr = Encoding.UTF8.GetBytes("SIP"); // server is private
+                                        await handler.SendAsync(buffr, 0);
+                                        DateTime timeS = DateTime.Now;
+                                        richTextBox1.Text += $"{timeS.Hour}h:{timeS.Minute}m:{timeS.Second}s >> ADTSL request received => denied;\n";
                                     }
-                                }
-                                catch (Exception) { }
-
-                                ansBuff = new byte[0];
-                                buffRec = new byte[0];
-                            }
-                            /*      for (int index = 0;index < devices.Count;index++)
-                                  {
-
-                                  }*/
-                            break;
-                        case "GFFS":
-                            try
-                            {
-                                if (serverinfo.Encoding == 0) {
-                                    byte[] FileBuffer = File.ReadAllBytes(CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer);
-                                    string[] spl = CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer.Split(".");
-                                    byte[] bufferF = Encoding.UTF8.GetBytes($"GFFS:{FileBuffer.Length}:15:{spl[2]}");
-                                    await handler.SendAsync(bufferF, 0);
-                                    await handler.SendAsync(FileBuffer, 0);
-                                    DateTime timeI = DateTime.Now;
-                                    richTextBox1.Text += $"{timeI.Hour}h:{timeI.Minute}m:{timeI.Second}s >> User downloaded file from server ({FileBuffer.Length} bytes);\n";
-                                    FileBuffer = new byte[0];
-                                }
-                                else if (serverinfo.Encoding == 1)
-                                {
-                                    byte[] FileBuffer = File.ReadAllBytes(CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer);
-                                    EncryptedFile encF = TEAv2.FileToBuffer(FileBuffer);
-                                    string[] spl = CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer.Split(".");
-                                    byte[] bufferF = Encoding.UTF8.GetBytes($"GFFS:{encF.fileBuffer.Length}:15:{spl[2]}");
-                                    await handler.SendAsync(bufferF, 0);
-                                    byte[] keyBuff = Encoding.UTF8.GetBytes(encF.Key);
-                                    Thread.Sleep(10);
-                                    await handler.SendAsync(keyBuff,0);
-                                    await handler.SendAsync(encF.fileBuffer, 0);
-                                    DateTime timeI = DateTime.Now;
-                                    FileBuffer = new byte[0];
-                                    richTextBox1.Text += $"{timeI.Hour}h:{timeI.Minute}m:{timeI.Second}s >> User downloaded file from server ({encF.fileBuffer.Length} bytes);\n";
-                                    encF = null;
-                                }  
-                            }catch (Exception) { }
-                            break;
-                        case "GACI":
-                            string ids = "";
-                            for (int ind = 0; ind < CommitsList.Count; ind++)
-                            {
-                                if (CommitsList[ind].Status)
-                                {
-                                    ids += CommitsList[ind].CommitID + " ";
-                                }
-                            }
-                            byte[] buffrFo = Encoding.UTF8.GetBytes($"GACI:{ids}");
-                            await handler.SendAsync(buffrFo, 0);
-                            DateTime timeJ = DateTime.Now;
-                            richTextBox1.Text += $"{timeJ.Hour}h:{timeJ.Minute}m:{timeJ.Second}s >> User requested commit ids list => accept;\n";
-                            break;
-                        case "SCP":
-                            CommitData CData = CommitsList[Convert.ToInt32(DoublePointSplitted[1])];
-                            byte[] buffrFi = Encoding.UTF8.GetBytes($"SCP:{CData.CommitName}:{CData.bytesInFile}");
-                            await handler.SendAsync(buffrFi, 0);
-                            DateTime timeK = DateTime.Now;
-                            richTextBox1.Text += $"{timeK.Hour}h:{timeK.Minute}m:{timeK.Second}s >> commit data sent (commit id - {DoublePointSplitted[1]});\n";
-                            break;
-                        case "DD":
-                            ConnectedDevice device1 = new ConnectedDevice();
-                            try
-                            {
-                                foreach (ConnectedDevice dev in devices)
-                                {
-                                    if (dev.IpAddress == DoublePointSplitted[1])
+                                    break;
+                                case "CNUPu":
+                                    ConnectedDevice device = new ConnectedDevice();
+                                    device.DeviceName = DoublePointSplitted[1];
+                                    IPEndPoint remoteEndPoint = (IPEndPoint)handler.RemoteEndPoint;
+                                    IPAddress deviceAddr = remoteEndPoint.Address;
+                                    device.IpAddress = deviceAddr.ToString();
+                                    devices.Add(device);
+                                    refreshDevicesList();
+                                    DateTime time = DateTime.Now;
+                                    richTextBox1.Text += $"{time.Hour}h:{time.Minute}m:{time.Second}s >> Connected new user: {device.DeviceName};\n";
+                                    byte[] buffrS = Encoding.UTF8.GetBytes("AG"); // access granted
+                                    await handler.SendAsync(buffrS, 0);
+                                    ConnectionsNum++;
+                                    label12.Text = ConnectionsNum.ToString();
+                                    break;
+                                case "CNUPr":
+                                    if (DoublePointSplitted[2].Replace(" ", "") == serverinfo.Password.Replace(" ", ""))
                                     {
-                                        devices.Remove(dev);
-                                        device1 = dev;
+                                        ConnectedDevice deviceS = new ConnectedDevice();
+                                        deviceS.DeviceName = DoublePointSplitted[1];
+                                        IPEndPoint remoteEndPointS = (IPEndPoint)handler.RemoteEndPoint;
+                                        IPAddress deviceAddrS = remoteEndPointS.Address;
+                                        deviceS.IpAddress = deviceAddrS.ToString();
+                                        devices.Add(deviceS);
+                                        refreshDevicesList();
+                                        DateTime timeD = DateTime.Now;
+                                        richTextBox1.Text += $"{timeD.Hour}h:{timeD.Minute}m:{timeD.Second}s >> Connected new user: {deviceS.DeviceName};\n";
+                                        byte[] buffrT = Encoding.UTF8.GetBytes("AG"); // access granted
+                                        await handler.SendAsync(buffrT, 0);
+                                        ConnectionsNum++;
+                                        label12.Text = ConnectionsNum.ToString();
                                     }
-                                }
-                                refreshDevicesList();
-                                richTextBox2.Refresh();
-                                ConnectionsNum--;
-                                DateTime timeL = DateTime.Now;
-                                richTextBox1.Text += $"{timeL.Hour}h:{timeL.Minute}m:{timeL.Second}s >> disconnected user: IP - {device1.IpAddress}, Device name - {device1.DeviceName};\n";
-                            }
-                            catch (Exception ex) { /*MessageBox.Show(ex.Message);*/ richTextBox2.Text += " "; ConnectionsNum--; DateTime timeL = DateTime.Now; richTextBox1.Text += $"{timeL.Hour}h:{timeL.Minute}m:{timeL.Second}s >> disconnected user: IP - {device1.IpAddress}, Device name - {device1.DeviceName};\n"; }
-                            break;
-                        case "FD":
+                                    else
+                                    {
+                                        byte[] buffrT = Encoding.UTF8.GetBytes("AD"); // access denied
+                                        await handler.SendAsync(buffrT, 0);
+                                    }
+                                    break;
+                                case "GCSI":
+                                    byte[] buffrF = Encoding.UTF8.GetBytes($"SCSI:{serverinfo.ServerName}:{serverinfo.Encoding}:{serverinfo.type}");
+                                    DateTime timeG = DateTime.Now;
+                                    richTextBox1.Text += $"{timeG.Hour}h:{timeG.Minute}m:{timeG.Second}s >> Information about server requested => accept;\n";
+                                    await handler.SendAsync(buffrF, 0);
+                                    break;
+                                case "UFTS":
+                                    connectedSockets.Add(handler);
+                                    if (serverinfo.Encoding == 0)
+                                    {
+                                        byte[] ansBuff = Encoding.UTF8.GetBytes("RD");
+                                        await handler.SendAsync(ansBuff, 0);
+                                        byte[] buffRec = new byte[Convert.ToInt32(DoublePointSplitted[1])];
+                                        for (int count = 0; count <= Convert.ToInt32(DoublePointSplitted[2]); count++)
+                                        {
+                                            await handler.ReceiveAsync(buffRec, 0);
+                                        }
+                                        CommitData data = new CommitData();
+                                        data.CommitID = CommitsList.Count.ToString();
+                                        data.bytesInFile = buffRec.Length;
+                                        data.CommitName = DoublePointSplitted[4];
+                                        data.pathToFileInServer = AppDomain.CurrentDomain.BaseDirectory + $@"\ServerData\Commit{data.CommitID}.{DoublePointSplitted[3]}";
+                                        CommitsList.Add(data);
+                                        serverWeight += data.bytesInFile;
+                                        label13.Text = $"Server weight:\n {serverWeight} bytes";
+                                        DateTime timeH = DateTime.Now;
+                                        richTextBox1.Text += $"{timeH.Hour}h:{timeH.Minute}m:{timeH.Second}s >> User uploaded file to server ({serverWeight.ToString()} bytes);\n";
+                                        if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\"))
+                                        {
+                                            Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\");
+                                            File.WriteAllBytes(data.pathToFileInServer, buffRec);
+                                        }
+                                        else
+                                        {
+                                            File.WriteAllBytes(data.pathToFileInServer, buffRec);
+                                        }
+                                        byte[] UpdBuffr = Encoding.UTF8.GetBytes("UPD");
+                                        try
+                                        {
+                                            for (int ind = 0; ind < listeners.Count; ind++)
+                                            {
+                                                await listeners[ind].SendAsync(UpdBuffr, 0);
+                                            }
+                                        }
+                                        catch (Exception) { }
 
-                            break;
-                        case "ASL":
-                            listeners.Add(handler);
-                            break;
+                                        ansBuff = new byte[0];
+                                        buffRec = new byte[0];
+                                    }
+                                    else if (serverinfo.Encoding == 1)
+                                    {
+                                        byte[] ansBuff = Encoding.UTF8.GetBytes("RD");
+                                        byte[] KeyBuffer = new byte[1024];
+                                        int countk = await handler.ReceiveAsync(KeyBuffer, 0);
+                                        string Key = Encoding.UTF8.GetString(KeyBuffer, 0, countk);
+                                        byte[] buffRecB = new byte[Convert.ToInt32(DoublePointSplitted[1])];
+                                        await handler.SendAsync(ansBuff, 0);
+                                        for (int count = 0; count <= Convert.ToInt32(DoublePointSplitted[2]); count++)
+                                        {
+                                            await handler.ReceiveAsync(buffRecB, 0);
+                                        }
+                                        byte[] buffRec = new byte[0];
+                                        try
+                                        {
+                                            EncryptedFile fEnc = new EncryptedFile() { fileBuffer = buffRecB, Key = Key };
+                                            buffRec = TEAv2.BufferToFile(fEnc);
+                                            fEnc = null;
+                                        }
+                                        catch (Exception) { }
+                                        CommitData data = new CommitData();
+                                        data.CommitID = CommitsList.Count.ToString();
+                                        data.bytesInFile = buffRec.Length;
+                                        data.CommitName = DoublePointSplitted[4];
+                                        data.pathToFileInServer = AppDomain.CurrentDomain.BaseDirectory + $@"\ServerData\Commit{data.CommitID}.{DoublePointSplitted[3]}";
+                                        CommitsList.Add(data);
+                                        serverWeight += data.bytesInFile;
+                                        label13.Text = $"Server weight:\n {serverWeight} bytes";
+                                        DateTime timeH = DateTime.Now;
+                                        richTextBox1.Text += $"{timeH.Hour}h:{timeH.Minute}m:{timeH.Second}s >> User uploaded file to server ({serverWeight.ToString()} bytes);\n";
+                                        if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\"))
+                                        {
+                                            Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\");
+                                            File.WriteAllBytes(data.pathToFileInServer, buffRec);
+                                        }
+                                        else
+                                        {
+                                            File.WriteAllBytes(data.pathToFileInServer, buffRec);
+                                        }
+                                        byte[] UpdBuffr = Encoding.UTF8.GetBytes("UPD");
+                                        try
+                                        {
+                                            for (int ind = 0; ind < listeners.Count; ind++)
+                                            {
+                                                await listeners[ind].SendAsync(UpdBuffr, 0);
+                                            }
+                                        }
+                                        catch (Exception) { }
+
+                                        ansBuff = new byte[0];
+                                        buffRec = new byte[0];
+                                    }
+                                    /*      for (int index = 0;index < devices.Count;index++)
+                                          {
+
+                                          }*/
+                                    connectedSockets.Remove(handler);
+                                    break;
+                                case "GFFS":
+                                    try
+                                    {
+                                        connectedSockets.Add(handler);
+                                        if (serverinfo.Encoding == 0)
+                                        {
+                                            byte[] FileBuffer = File.ReadAllBytes(CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer);
+                                            string[] spl = CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer.Split(".");
+                                            byte[] bufferF = Encoding.UTF8.GetBytes($"GFFS:{FileBuffer.Length}:15:{spl[2]}");
+                                            await handler.SendAsync(bufferF, 0);
+                                            await handler.SendAsync(FileBuffer, 0);
+                                            DateTime timeI = DateTime.Now;
+                                            richTextBox1.Text += $"{timeI.Hour}h:{timeI.Minute}m:{timeI.Second}s >> User downloaded file from server ({FileBuffer.Length} bytes);\n";
+                                            FileBuffer = new byte[0];
+                                        }
+                                        else if (serverinfo.Encoding == 1)
+                                        {
+                                            byte[] FileBuffer = File.ReadAllBytes(CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer);
+                                            EncryptedFile encF = TEAv2.FileToBuffer(FileBuffer);
+                                            string[] spl = CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer.Split(".");
+                                            byte[] bufferF = Encoding.UTF8.GetBytes($"GFFS:{encF.fileBuffer.Length}:15:{spl[2]}");
+                                            await handler.SendAsync(bufferF, 0);
+                                            byte[] keyBuff = Encoding.UTF8.GetBytes(encF.Key);
+                                            Thread.Sleep(10);
+                                            await handler.SendAsync(keyBuff, 0);
+                                            await handler.SendAsync(encF.fileBuffer, 0);
+                                            DateTime timeI = DateTime.Now;
+                                            FileBuffer = new byte[0];
+                                            richTextBox1.Text += $"{timeI.Hour}h:{timeI.Minute}m:{timeI.Second}s >> User downloaded file from server ({encF.fileBuffer.Length} bytes);\n";
+                                            encF = null;
+                                        }
+                                        connectedSockets.Remove(handler);
+                                    }
+                                    catch (Exception) { }
+                                    break;
+                                case "GACI":
+                                    string ids = "";
+                                    for (int ind = 0; ind < CommitsList.Count; ind++)
+                                    {
+                                        if (CommitsList[ind].Status)
+                                        {
+                                            ids += CommitsList[ind].CommitID + " ";
+                                        }
+                                    }
+                                    byte[] buffrFo = Encoding.UTF8.GetBytes($"GACI:{ids}");
+                                    await handler.SendAsync(buffrFo, 0);
+                                    DateTime timeJ = DateTime.Now;
+                                    richTextBox1.Text += $"{timeJ.Hour}h:{timeJ.Minute}m:{timeJ.Second}s >> User requested commit ids list => accept;\n";
+                                    break;
+                                case "SCP":
+                                    CommitData CData = CommitsList[Convert.ToInt32(DoublePointSplitted[1])];
+                                    byte[] buffrFi = Encoding.UTF8.GetBytes($"SCP:{CData.CommitName}:{CData.bytesInFile}");
+                                    await handler.SendAsync(buffrFi, 0);
+                                    DateTime timeK = DateTime.Now;
+                                    richTextBox1.Text += $"{timeK.Hour}h:{timeK.Minute}m:{timeK.Second}s >> commit data sent (commit id - {DoublePointSplitted[1]});\n";
+                                    break;
+                                case "DD":
+                                    ConnectedDevice device1 = new ConnectedDevice();
+                                    try
+                                    {
+                                        foreach (ConnectedDevice dev in devices)
+                                        {
+                                            if (dev.IpAddress == DoublePointSplitted[1])
+                                            {
+                                                devices.Remove(dev);
+                                                device1 = dev;
+                                            }
+                                        }
+                                        refreshDevicesList();
+                                        richTextBox2.Refresh();
+                                        ConnectionsNum--;
+
+                                        DateTime timeL = DateTime.Now;
+                                        richTextBox1.Text += $"{timeL.Hour}h:{timeL.Minute}m:{timeL.Second}s >> disconnected user: IP - {device1.IpAddress}, Device name - {device1.DeviceName};\n";
+                                    }
+                                    catch (Exception ex) { /*MessageBox.Show(ex.Message);*/ richTextBox2.Text += " "; ConnectionsNum--; DateTime timeL = DateTime.Now; richTextBox1.Text += $"{timeL.Hour}h:{timeL.Minute}m:{timeL.Second}s >> disconnected user: IP - {device1.IpAddress}, Device name - {device1.DeviceName};\n"; }
+                                    break;
+                                case "FD":
+
+                                    break;
+                                case "ASL":
+                                    listeners.Add(handler);
+                                    // connectedSockets.Add(handler);
+                                    break;
+                            }
+                            ConnectionsNum--;
+                            label12.Text = ConnectionsNum.ToString();
+                        }else if (!checkBox2.Checked)
+                        {
+                            ConnectionsNum++;
+                            label12.Text = ConnectionsNum.ToString();
+                            byte[] buffer = new byte[2048];
+                            int received = await handler.ReceiveAsync(buffer, 0);
+                            string responce = Encoding.UTF8.GetString(buffer, 0, received);
+                            string[] DoublePointSplitted = responce.Split(":");
+                            switch (DoublePointSplitted[0])
+                            {
+                                case "ADTSL":
+                                    if (serverinfo.type == 0)
+                                    {
+                                        byte[] buffr = Encoding.UTF8.GetBytes(serverinfo.ServerName);
+                                        await handler.SendAsync(buffr, 0);
+                                        DateTime timeA = DateTime.Now;
+                                        richTextBox1.Text += $"{timeA.Hour}h:{timeA.Minute}m:{timeA.Second}s >> ADTSL request received => accept;\n";
+                                    }
+                                    else
+                                    {
+                                        byte[] buffr = Encoding.UTF8.GetBytes("SIP"); // server is private
+                                        await handler.SendAsync(buffr, 0);
+                                        DateTime timeS = DateTime.Now;
+                                        richTextBox1.Text += $"{timeS.Hour}h:{timeS.Minute}m:{timeS.Second}s >> ADTSL request received => denied;\n";
+                                    }
+                                    break;
+                                case "CNUPu":
+                                    ConnectedDevice device = new ConnectedDevice();
+                                    device.DeviceName = DoublePointSplitted[1];
+                                    IPEndPoint remoteEndPoint = (IPEndPoint)handler.RemoteEndPoint;
+                                    IPAddress deviceAddr = remoteEndPoint.Address;
+                                    device.IpAddress = deviceAddr.ToString();
+                                    devices.Add(device);
+                                    refreshDevicesList();
+                                    DateTime time = DateTime.Now;
+                                    richTextBox1.Text += $"{time.Hour}h:{time.Minute}m:{time.Second}s >> Connected new user: {device.DeviceName};\n";
+                                    byte[] buffrS = Encoding.UTF8.GetBytes("AG"); // access granted
+                                    await handler.SendAsync(buffrS, 0);
+                                    ConnectionsNum++;
+                                    label12.Text = ConnectionsNum.ToString();
+                                    break;
+                                case "CNUPr":
+                                    if (DoublePointSplitted[2].Replace(" ", "") == serverinfo.Password.Replace(" ", ""))
+                                    {
+                                        ConnectedDevice deviceS = new ConnectedDevice();
+                                        deviceS.DeviceName = DoublePointSplitted[1];
+                                        IPEndPoint remoteEndPointS = (IPEndPoint)handler.RemoteEndPoint;
+                                        IPAddress deviceAddrS = remoteEndPointS.Address;
+                                        deviceS.IpAddress = deviceAddrS.ToString();
+                                        devices.Add(deviceS);
+                                        refreshDevicesList();
+                                        DateTime timeD = DateTime.Now;
+                                        richTextBox1.Text += $"{timeD.Hour}h:{timeD.Minute}m:{timeD.Second}s >> Connected new user: {deviceS.DeviceName};\n";
+                                        byte[] buffrT = Encoding.UTF8.GetBytes("AG"); // access granted
+                                        await handler.SendAsync(buffrT, 0);
+                                        ConnectionsNum++;
+                                        label12.Text = ConnectionsNum.ToString();
+                                    }
+                                    else
+                                    {
+                                        byte[] buffrT = Encoding.UTF8.GetBytes("AD"); // access denied
+                                        await handler.SendAsync(buffrT, 0);
+                                    }
+                                    break;
+                                case "GCSI":
+                                    byte[] buffrF = Encoding.UTF8.GetBytes($"SCSI:{serverinfo.ServerName}:{serverinfo.Encoding}:{serverinfo.type}");
+                                    DateTime timeG = DateTime.Now;
+                                    richTextBox1.Text += $"{timeG.Hour}h:{timeG.Minute}m:{timeG.Second}s >> Information about server requested => accept;\n";
+                                    await handler.SendAsync(buffrF, 0);
+                                    break;
+                                case "UFTS":
+                                    connectedSockets.Add(handler);
+                                    if (serverinfo.Encoding == 0)
+                                    {
+                                        byte[] ansBuff = Encoding.UTF8.GetBytes("RD");
+                                        await handler.SendAsync(ansBuff, 0);
+                                        byte[] buffRec = new byte[Convert.ToInt32(DoublePointSplitted[1])];
+                                        for (int count = 0; count <= Convert.ToInt32(DoublePointSplitted[2]); count++)
+                                        {
+                                            await handler.ReceiveAsync(buffRec, 0);
+                                        }
+                                        CommitData data = new CommitData();
+                                        data.CommitID = CommitsList.Count.ToString();
+                                        data.bytesInFile = buffRec.Length;
+                                        data.CommitName = DoublePointSplitted[4];
+                                        data.pathToFileInServer = AppDomain.CurrentDomain.BaseDirectory + $@"\ServerData\Commit{data.CommitID}.{DoublePointSplitted[3]}";
+                                        CommitsList.Add(data);
+                                        serverWeight += data.bytesInFile;
+                                        label13.Text = $"Server weight:\n {serverWeight} bytes";
+                                        DateTime timeH = DateTime.Now;
+                                        richTextBox1.Text += $"{timeH.Hour}h:{timeH.Minute}m:{timeH.Second}s >> User uploaded file to server ({serverWeight.ToString()} bytes);\n";
+                                        if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\"))
+                                        {
+                                            Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\");
+                                            File.WriteAllBytes(data.pathToFileInServer, buffRec);
+                                        }
+                                        else
+                                        {
+                                            File.WriteAllBytes(data.pathToFileInServer, buffRec);
+                                        }
+                                        byte[] UpdBuffr = Encoding.UTF8.GetBytes("UPD");
+                                        try
+                                        {
+                                            for (int ind = 0; ind < listeners.Count; ind++)
+                                            {
+                                                await listeners[ind].SendAsync(UpdBuffr, 0);
+                                            }
+                                        }
+                                        catch (Exception) { }
+
+                                        ansBuff = new byte[0];
+                                        buffRec = new byte[0];
+                                    }
+                                    else if (serverinfo.Encoding == 1)
+                                    {
+                                        byte[] ansBuff = Encoding.UTF8.GetBytes("RD");
+                                        byte[] KeyBuffer = new byte[1024];
+                                        int countk = await handler.ReceiveAsync(KeyBuffer, 0);
+                                        string Key = Encoding.UTF8.GetString(KeyBuffer, 0, countk);
+                                        byte[] buffRecB = new byte[Convert.ToInt32(DoublePointSplitted[1])];
+                                        await handler.SendAsync(ansBuff, 0);
+                                        for (int count = 0; count <= Convert.ToInt32(DoublePointSplitted[2]); count++)
+                                        {
+                                            await handler.ReceiveAsync(buffRecB, 0);
+                                        }
+                                        byte[] buffRec = new byte[0];
+                                        try
+                                        {
+                                            EncryptedFile fEnc = new EncryptedFile() { fileBuffer = buffRecB, Key = Key };
+                                            buffRec = TEAv2.BufferToFile(fEnc);
+                                            fEnc = null;
+                                        }
+                                        catch (Exception) { }
+                                        CommitData data = new CommitData();
+                                        data.CommitID = CommitsList.Count.ToString();
+                                        data.bytesInFile = buffRec.Length;
+                                        data.CommitName = DoublePointSplitted[4];
+                                        data.pathToFileInServer = AppDomain.CurrentDomain.BaseDirectory + $@"\ServerData\Commit{data.CommitID}.{DoublePointSplitted[3]}";
+                                        CommitsList.Add(data);
+                                        serverWeight += data.bytesInFile;
+                                        label13.Text = $"Server weight:\n {serverWeight} bytes";
+                                        DateTime timeH = DateTime.Now;
+                                        richTextBox1.Text += $"{timeH.Hour}h:{timeH.Minute}m:{timeH.Second}s >> User uploaded file to server ({serverWeight.ToString()} bytes);\n";
+                                        if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\"))
+                                        {
+                                            Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + @"\ServerData\");
+                                            File.WriteAllBytes(data.pathToFileInServer, buffRec);
+                                        }
+                                        else
+                                        {
+                                            File.WriteAllBytes(data.pathToFileInServer, buffRec);
+                                        }
+                                        byte[] UpdBuffr = Encoding.UTF8.GetBytes("UPD");
+                                        try
+                                        {
+                                            for (int ind = 0; ind < listeners.Count; ind++)
+                                            {
+                                                await listeners[ind].SendAsync(UpdBuffr, 0);
+                                            }
+                                        }
+                                        catch (Exception) { }
+
+                                        ansBuff = new byte[0];
+                                        buffRec = new byte[0];
+                                    }
+                                    /*      for (int index = 0;index < devices.Count;index++)
+                                          {
+
+                                          }*/
+                                    connectedSockets.Remove(handler);
+                                    break;
+                                case "GFFS":
+                                    try
+                                    {
+                                        connectedSockets.Add(handler);
+                                        if (serverinfo.Encoding == 0)
+                                        {
+                                            byte[] FileBuffer = File.ReadAllBytes(CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer);
+                                            string[] spl = CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer.Split(".");
+                                            byte[] bufferF = Encoding.UTF8.GetBytes($"GFFS:{FileBuffer.Length}:15:{spl[2]}");
+                                            await handler.SendAsync(bufferF, 0);
+                                            await handler.SendAsync(FileBuffer, 0);
+                                            DateTime timeI = DateTime.Now;
+                                            richTextBox1.Text += $"{timeI.Hour}h:{timeI.Minute}m:{timeI.Second}s >> User downloaded file from server ({FileBuffer.Length} bytes);\n";
+                                            FileBuffer = new byte[0];
+                                        }
+                                        else if (serverinfo.Encoding == 1)
+                                        {
+                                            byte[] FileBuffer = File.ReadAllBytes(CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer);
+                                            EncryptedFile encF = TEAv2.FileToBuffer(FileBuffer);
+                                            string[] spl = CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer.Split(".");
+                                            byte[] bufferF = Encoding.UTF8.GetBytes($"GFFS:{encF.fileBuffer.Length}:15:{spl[2]}");
+                                            await handler.SendAsync(bufferF, 0);
+                                            byte[] keyBuff = Encoding.UTF8.GetBytes(encF.Key);
+                                            Thread.Sleep(10);
+                                            await handler.SendAsync(keyBuff, 0);
+                                            await handler.SendAsync(encF.fileBuffer, 0);
+                                            DateTime timeI = DateTime.Now;
+                                            FileBuffer = new byte[0];
+                                            richTextBox1.Text += $"{timeI.Hour}h:{timeI.Minute}m:{timeI.Second}s >> User downloaded file from server ({encF.fileBuffer.Length} bytes);\n";
+                                            encF = null;
+                                        }
+                                        connectedSockets.Remove(handler);
+                                    }
+                                    catch (Exception) { }
+                                    break;
+                                case "GACI":
+                                    string ids = "";
+                                    for (int ind = 0; ind < CommitsList.Count; ind++)
+                                    {
+                                        if (CommitsList[ind].Status)
+                                        {
+                                            ids += CommitsList[ind].CommitID + " ";
+                                        }
+                                    }
+                                    byte[] buffrFo = Encoding.UTF8.GetBytes($"GACI:{ids}");
+                                    await handler.SendAsync(buffrFo, 0);
+                                    DateTime timeJ = DateTime.Now;
+                                    richTextBox1.Text += $"{timeJ.Hour}h:{timeJ.Minute}m:{timeJ.Second}s >> User requested commit ids list => accept;\n";
+                                    break;
+                                case "SCP":
+                                    CommitData CData = CommitsList[Convert.ToInt32(DoublePointSplitted[1])];
+                                    byte[] buffrFi = Encoding.UTF8.GetBytes($"SCP:{CData.CommitName}:{CData.bytesInFile}");
+                                    await handler.SendAsync(buffrFi, 0);
+                                    DateTime timeK = DateTime.Now;
+                                    richTextBox1.Text += $"{timeK.Hour}h:{timeK.Minute}m:{timeK.Second}s >> commit data sent (commit id - {DoublePointSplitted[1]});\n";
+                                    break;
+                                case "DD":
+                                    ConnectedDevice device1 = new ConnectedDevice();
+                                    try
+                                    {
+                                        foreach (ConnectedDevice dev in devices)
+                                        {
+                                            if (dev.IpAddress == DoublePointSplitted[1])
+                                            {
+                                                devices.Remove(dev);
+                                                device1 = dev;
+                                            }
+                                        }
+                                        refreshDevicesList();
+                                        richTextBox2.Refresh();
+                                        ConnectionsNum--;
+
+                                        DateTime timeL = DateTime.Now;
+                                        richTextBox1.Text += $"{timeL.Hour}h:{timeL.Minute}m:{timeL.Second}s >> disconnected user: IP - {device1.IpAddress}, Device name - {device1.DeviceName};\n";
+                                    }
+                                    catch (Exception ex) { /*MessageBox.Show(ex.Message);*/ richTextBox2.Text += " "; ConnectionsNum--; DateTime timeL = DateTime.Now; richTextBox1.Text += $"{timeL.Hour}h:{timeL.Minute}m:{timeL.Second}s >> disconnected user: IP - {device1.IpAddress}, Device name - {device1.DeviceName};\n"; }
+                                    break;
+                                case "FD":
+
+                                    break;
+                                case "ASL":
+                                    listeners.Add(handler);
+                                    // connectedSockets.Add(handler);
+                                    break;
+                            }
+                            ConnectionsNum--;
+                            label12.Text = ConnectionsNum.ToString();
+                        }
                     }
-                    ConnectionsNum--;
-                    label12.Text = ConnectionsNum.ToString();
                 }
+                catch (Exception) { }
             }
         }
         private void button3_Click(object sender, EventArgs e)
@@ -615,6 +900,12 @@ namespace LocalNetworkFileShare
             {
                 points.Add(new Point(430, 170));
             }
+            int lCount = 0;
+         /*   for (int ind = 0; ind < listeners.Count; ind++)
+            {
+                if (listeners[ind].) { lCount++; }
+            }
+            label12.Text = $"{connectedSockets.Count + lCount}";*/
             points.Add(new Point(430, 170 - ConnectionsNum));
             Point[] pointArray = new Point[points.Count];
             for (int ind = 0; ind < points.Count; ind++)
@@ -667,6 +958,7 @@ namespace LocalNetworkFileShare
             thread0 = new Thread(thread0Starter);
             thread0.IsBackground = true;
             thread0.Start();
+            //StartAllParallelThreads();
         }
 
         private void button4_Click(object sender, EventArgs e)
@@ -716,7 +1008,98 @@ namespace LocalNetworkFileShare
         {
             points.Clear();
         }
-
+        public delegate void ConnectionOverloadProtectorDel(ServerControlMenu currentClass);
+        public void ConnectionOverloadProtector() // test
+        {
+            if (checkBox2.Checked) {
+                List<IPconnections> IPs = new List<IPconnections>();
+                foreach (Socket connection in listeners) 
+                {
+                    if (!connection.IsBound)
+                    {
+                        listeners.Remove(connection);
+                        break;
+                    }
+                    bool isInlist = false;
+                    IPEndPoint remoteIp = (IPEndPoint)connection.RemoteEndPoint;
+                    IPAddress adr = remoteIp.Address;
+                    int ind1 = 0;
+                    foreach (IPconnections connetions in IPs)
+                    {
+                        if (connetions.Ip.ToString() == adr.ToString())
+                        {
+                            isInlist = true;
+                            // ind1++;
+                            break;
+                        }
+                        ind1++;
+                    }
+                    if (isInlist)
+                    {
+                        IPconnections connetions1 = new IPconnections();
+                        connetions1.Ip = adr;
+                        IPs[ind1].numOfConnections++;
+                    }
+                    else
+                    {
+                        IPconnections curr = new IPconnections();
+                        curr.numOfConnections++;
+                        curr.Ip = adr;
+                        IPs.Add(curr);
+                    }
+                }
+                int index = 0;
+                foreach (IPconnections connetions in IPs)
+                {
+                    if (connetions.numOfConnections > 2)
+                    {
+                        BannedIPs.Add(IPs[index].Ip);
+                    }
+                    index++;
+                }
+                int indexS = 0;
+                foreach (IPconnections connections in IPs)
+                {
+                    if (connections.numOfConnections < 2)
+                    {
+                        BannedIPs.Remove(IPs[indexS].Ip);
+                    }
+                    indexS++;
+                }
+                try
+                {
+                    button5.Visible = false;
+                }
+                catch (Exception) { return; }
+            }
+        }
+        public static void COPfromPTstarter(ServerControlMenu currentClass)
+        {
+            currentClass.ConnectionOverloadProtector();
+        }
+        private static void COPcontroller(ServerControlMenu currentClass)
+        {
+            while (true)
+            {
+                try
+                {
+                    currentClass.Invoke(new ConnectionOverloadProtectorDel(COPfromPTstarter), new object[] { currentClass });
+                    Thread.Sleep(100);
+                }
+                catch (Exception e)
+                {
+                    Thread thread = Thread.CurrentThread;
+                    //thread.Abort();
+                }
+            }
+        }
+        private void StartAllParallelThreads()
+        {
+            ThreadStart COPcontrollerThreadStart = new ThreadStart(delegate { COPcontroller(this); });
+            Thread COPcontrollerThread = new Thread(COPcontrollerThreadStart);
+            //COPcontrollerThread.IsBackground = true;
+            COPcontrollerThread.Start();
+        }
         private void ServerControlMenu_FormClosing(object sender, FormClosingEventArgs e)
         {
             IsClassExist = false;
@@ -746,7 +1129,7 @@ namespace LocalNetworkFileShare
             switch (textSpl[0])
             {
                 case "help":
-                    ConsoleText += "Commands:\n - disconn_dev [device IP] // disconnect device\n - del_comm '[commit name]' // delete commit\n - dev_info '[device name]' // device information\n - dis_comms // disable all commits\n - en_comms // enable all commits\n - tot_mem_cln // total memory clean\n";
+                    ConsoleText += "Commands:\n - disconn_dev [device IP] // disconnect device\n - del_comm '[commit name]' // delete commit\n - dev_info '[device name]' // device information\n - dis_comms // disable all commits\n - en_comms // enable all commits\n - tot_mem_cln // total memory clean\n - ip_add_banl [ip] // add ip to ban list\n - ip_add_whl [ip] // add ip to white list\n - ips_tot_conns_list // total connetions number to IPs\n";
                     break;
                 case "disconn_dev":
                     DisconnectDevice(textSpl[1]);
@@ -760,7 +1143,7 @@ namespace LocalNetworkFileShare
                 case "dev_info":
                     string[] splDd = textBox1.Text.Split("'");
                     int DeviceIndex = 0;
-                    for (int indx = 0;indx < devices.Count;indx++)
+                    for (int indx = 0; indx < devices.Count; indx++)
                     {
                         if (devices[indx].DeviceName == splDd[1])
                         {
@@ -779,9 +1162,72 @@ namespace LocalNetworkFileShare
                     break;
                 case "tot_mem_cln":
                     points.Clear();
+                    connectedSockets.Clear();
                     richTextBox1.Text = "Cleared;";
                     // in the future i'll add more 
                     ConsoleText += $"Memory was cleaned\n";
+                    break;
+                case "ip_add_banl":
+                    IPAddress addr = IPAddress.Parse(textSpl[1]);
+                    BannedIPs.Add(addr);
+                    ConsoleText += $"Banned ip: {textSpl[1]}\n";
+                    break;
+                case "ip_add_whl":
+                    for (int ind =0;ind < BannedIPs.Count;ind++)
+                    {
+                        if (textSpl[1] == BannedIPs[ind].ToString())
+                        {
+                            BannedIPs.RemoveAt(ind);
+                        }
+                    }
+                    ConsoleText += $"Unbanned ip: {textSpl[1]}\n";
+                    break;
+                case "ips_tot_conns_list":
+                    ConsoleText += "-------------\n";
+                    List<IPconnections> list =  new List<IPconnections>();
+                    foreach (Socket connection in connectedSockets)
+                    {
+                        try
+                        {
+                            if (!connection.IsBound)
+                            {
+                                listeners.Remove(connection);
+                                break;
+                            }
+                            bool isInlist = false;
+                            IPEndPoint remoteIp = (IPEndPoint)connection.RemoteEndPoint;
+                            IPAddress adr = remoteIp.Address;
+                            int ind1 = 0;
+                            foreach (IPconnections connetions in list)
+                            {
+                                if (connetions.Ip.ToString() == adr.ToString())
+                                {
+                                    isInlist = true;
+                                    break;
+                                }
+                                ind1++;
+                            }
+                            if (isInlist)
+                            {
+                                IPconnections connetions1 = new IPconnections();
+                                connetions1.Ip = adr;
+                                list[ind1].numOfConnections++;
+                            }
+                            else
+                            {
+                                IPconnections curr = new IPconnections();
+                                curr.numOfConnections++;
+                                curr.Ip = adr;
+                                list.Add(curr);
+                            }
+                        }
+                        catch (Exception) { }
+                    }
+                    for (int ind = 0;ind < list.Count;ind++)
+                    {
+                        ConsoleText += $"|{list[ind].Ip} - {list[ind].numOfConnections} conns;\n";
+                    }
+                    ConsoleText += "-------------\n";
                     break;
             }
             richTextBox3.Text = ConsoleText;
@@ -819,6 +1265,7 @@ namespace LocalNetworkFileShare
                     {
                         CommitsList[index].Status = false;
                         File.Delete(comm.pathToFileInServer);
+                        serverWeight -= comm.bytesInFile;
                         byte[] UpdBuffr = Encoding.UTF8.GetBytes("UPD");
                         try
                         {
@@ -946,6 +1393,11 @@ namespace LocalNetworkFileShare
             if (checkBox3.Checked)
             {
                 DeleteAllConnections();
+                for (int ind = 0; ind < connectedSockets.Count; ind++)
+                {
+                    connectedSockets[ind].Close();
+                    connectedSockets.RemoveAt(ind);
+                }
                 DateTime timeL = DateTime.Now;
                 richTextBox1.Text += $"{timeL.Hour}h:{timeL.Minute}m:{timeL.Second}s >>  All connections have been deleted;\n";
             }
@@ -960,6 +1412,11 @@ namespace LocalNetworkFileShare
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label12_Click(object sender, EventArgs e)
         {
 
         }
@@ -1425,6 +1882,11 @@ namespace LocalNetworkFileShare
     {
         protected internal string Encrypted = "";
         protected internal string Key = "";
+    }
+    class IPconnections
+    {
+        protected internal IPAddress Ip;
+        protected internal int numOfConnections = 0;
     }
 }
 

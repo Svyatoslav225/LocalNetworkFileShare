@@ -59,10 +59,10 @@
             textBox1 = new TextBox();
             label10 = new Label();
             panel6 = new Panel();
+            richTextBox3 = new RichTextBox();
             button7 = new Button();
             button8 = new Button();
             label12 = new Label();
-            richTextBox3 = new RichTextBox();
             panel1.SuspendLayout();
             panel3.SuspendLayout();
             panel4.SuspendLayout();
@@ -424,6 +424,15 @@
             panel6.Size = new Size(551, 212);
             panel6.TabIndex = 19;
             // 
+            // richTextBox3
+            // 
+            richTextBox3.Location = new Point(3, 3);
+            richTextBox3.Name = "richTextBox3";
+            richTextBox3.ScrollBars = RichTextBoxScrollBars.Vertical;
+            richTextBox3.Size = new Size(545, 206);
+            richTextBox3.TabIndex = 0;
+            richTextBox3.Text = "";
+            // 
             // button7
             // 
             button7.Cursor = Cursors.Hand;
@@ -460,15 +469,7 @@
             label12.Size = new Size(23, 28);
             label12.TabIndex = 22;
             label12.Text = "0";
-            // 
-            // richTextBox3
-            // 
-            richTextBox3.Location = new Point(3, 3);
-            richTextBox3.Name = "richTextBox3";
-            richTextBox3.ScrollBars = RichTextBoxScrollBars.Vertical;
-            richTextBox3.Size = new Size(545, 206);
-            richTextBox3.TabIndex = 0;
-            richTextBox3.Text = "";
+            label12.Click += label12_Click;
             // 
             // ServerControlMenu
             // 

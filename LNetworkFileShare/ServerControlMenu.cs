@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Formats.Nrbf;
 using System.IO;
@@ -165,6 +166,8 @@ namespace LocalNetworkFileShare
                         label13.ForeColor = label1.ForeColor;
                         richTextBox3.BackColor = richTextBox1.BackColor;
                         richTextBox3.ForeColor = richTextBox1.ForeColor;
+                        button9.ForeColor = button1.ForeColor;
+                        button9.BackColor = button1.BackColor;
                     }
                     else if (words[0] == "UIText_language")
                     {
@@ -191,6 +194,7 @@ namespace LocalNetworkFileShare
                                 checkBox3.Text = "Enable";
                                 checkBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
                                 button8.Text = "Clear";
+                                button9.Text = "View";
                                 break;
                             case "1":
                                 label1.Text = "Подключённые устройства:";
@@ -213,6 +217,7 @@ namespace LocalNetworkFileShare
                                 checkBox3.Text = "Включить";
                                 checkBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
                                 button8.Text = "Очистить";
+                                button9.Text = "Обзор";
                                 break;
                             case "2":
                                 label1.Text = "Verbundene Geräte:";
@@ -235,6 +240,7 @@ namespace LocalNetworkFileShare
                                 checkBox3.Text = "Aktivieren";
                                 checkBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
                                 button8.Text = "Klar";
+                                button9.Text = "Blick";
                                 break;
                             case "3":
                                 label1.Text = "连接设备:";
@@ -257,6 +263,7 @@ namespace LocalNetworkFileShare
                                 checkBox3.Text = "启用";
                                 checkBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
                                 button8.Text = "清楚";
+                                button9.Text = "查看";
                                 break;
                         }
                     }
@@ -349,7 +356,7 @@ namespace LocalNetworkFileShare
                     var handler = await MainListener.AcceptAsync();
                     connectedSockets.Add(handler);
                     if (isServerPaused)
-                    { handler.Close();}
+                    { handler.Close(); }
                     else
                     {
                         IPEndPoint remoteIp = (IPEndPoint)handler.RemoteEndPoint;
@@ -617,7 +624,8 @@ namespace LocalNetworkFileShare
                             }
                             ConnectionsNum--;
                             label12.Text = ConnectionsNum.ToString();
-                        }else if (!checkBox2.Checked)
+                        }
+                        else if (!checkBox2.Checked)
                         {
                             ConnectionsNum++;
                             label12.Text = ConnectionsNum.ToString();
@@ -726,7 +734,7 @@ namespace LocalNetworkFileShare
                                             }
                                         }
                                         catch (Exception) { }
-
+                                        button9.Visible = true;
                                         ansBuff = new byte[0];
                                         buffRec = new byte[0];
                                     }
@@ -901,11 +909,11 @@ namespace LocalNetworkFileShare
                 points.Add(new Point(430, 170));
             }
             int lCount = 0;
-         /*   for (int ind = 0; ind < listeners.Count; ind++)
-            {
-                if (listeners[ind].) { lCount++; }
-            }
-            label12.Text = $"{connectedSockets.Count + lCount}";*/
+            /*   for (int ind = 0; ind < listeners.Count; ind++)
+               {
+                   if (listeners[ind].) { lCount++; }
+               }
+               label12.Text = $"{connectedSockets.Count + lCount}";*/
             points.Add(new Point(430, 170 - ConnectionsNum));
             Point[] pointArray = new Point[points.Count];
             for (int ind = 0; ind < points.Count; ind++)
@@ -980,6 +988,7 @@ namespace LocalNetworkFileShare
         {
             MainListening();
             button5.Visible = false;
+           // button9.Visible = true;
         }
 
         private void button6_MouseClick(object sender, MouseEventArgs e)
@@ -1011,9 +1020,10 @@ namespace LocalNetworkFileShare
         public delegate void ConnectionOverloadProtectorDel(ServerControlMenu currentClass);
         public void ConnectionOverloadProtector() // test
         {
-            if (checkBox2.Checked) {
+            if (checkBox2.Checked)
+            {
                 List<IPconnections> IPs = new List<IPconnections>();
-                foreach (Socket connection in listeners) 
+                foreach (Socket connection in listeners)
                 {
                     if (!connection.IsBound)
                     {
@@ -1173,7 +1183,7 @@ namespace LocalNetworkFileShare
                     ConsoleText += $"Banned ip: {textSpl[1]}\n";
                     break;
                 case "ip_add_whl":
-                    for (int ind =0;ind < BannedIPs.Count;ind++)
+                    for (int ind = 0; ind < BannedIPs.Count; ind++)
                     {
                         if (textSpl[1] == BannedIPs[ind].ToString())
                         {
@@ -1184,7 +1194,7 @@ namespace LocalNetworkFileShare
                     break;
                 case "ips_tot_conns_list":
                     ConsoleText += "-------------\n";
-                    List<IPconnections> list =  new List<IPconnections>();
+                    List<IPconnections> list = new List<IPconnections>();
                     foreach (Socket connection in connectedSockets)
                     {
                         try
@@ -1223,7 +1233,7 @@ namespace LocalNetworkFileShare
                         }
                         catch (Exception) { }
                     }
-                    for (int ind = 0;ind < list.Count;ind++)
+                    for (int ind = 0; ind < list.Count; ind++)
                     {
                         ConsoleText += $"|{list[ind].Ip} - {list[ind].numOfConnections} conns;\n";
                     }
@@ -1419,6 +1429,18 @@ namespace LocalNetworkFileShare
         private void label12_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void button9_MouseClick(object sender, MouseEventArgs e)
+        {
+            try
+            {
+                string baseDirNspl = AppDomain.CurrentDomain.BaseDirectory;
+                string baseDirectory = baseDirNspl.Replace(@"\\",@"\");
+                ProcessStartInfo process = new ProcessStartInfo("Explorer.exe", baseDirectory + @"ServerData\");
+                Process.Start(process);
+            }
+            catch (Exception) { }
         }
     }
     class ServerInfo

@@ -50,6 +50,7 @@
             button3 = new Button();
             label6 = new Label();
             panel5 = new Panel();
+            button9 = new Button();
             label13 = new Label();
             label7 = new Label();
             button5 = new Button();
@@ -318,6 +319,7 @@
             // panel5
             // 
             panel5.BackColor = Color.White;
+            panel5.Controls.Add(button9);
             panel5.Controls.Add(label13);
             panel5.Controls.Add(label7);
             panel5.Location = new Point(586, 15);
@@ -325,6 +327,18 @@
             panel5.Name = "panel5";
             panel5.Size = new Size(527, 622);
             panel5.TabIndex = 12;
+            // 
+            // button9
+            // 
+            button9.Cursor = Cursors.Hand;
+            button9.Location = new Point(400, 13);
+            button9.Name = "button9";
+            button9.Size = new Size(112, 45);
+            button9.TabIndex = 2;
+            button9.Text = "view";
+            button9.UseVisualStyleBackColor = true;
+            button9.Visible = false;
+            button9.MouseClick += button9_MouseClick;
             // 
             // label13
             // 
@@ -556,5 +570,6 @@
         private Label label12;
         private Label label13;
         private RichTextBox richTextBox3;
+        private Button button9;
     }
 }

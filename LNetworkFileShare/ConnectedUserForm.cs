@@ -24,6 +24,7 @@ namespace LocalNetworkFileShare
         public string EncodingStr = "";
         Socket MainListener;
         List<CommitData> commits = new List<CommitData>();
+        public bool isDarkTheme = false;
       //  List<CommitCard> commitsVisual = new List<CommitCard>();
         public ConnectedUserForm()
         {
@@ -71,8 +72,13 @@ namespace LocalNetworkFileShare
                                 textBox1.ForeColor = Color.Black;
                                 textBox2.ForeColor = textBox1.ForeColor;
                                 textBox2.BackColor = textBox1.BackColor;
+                                button4.BackColor = button1.BackColor;
+                                button4.ForeColor = button1.ForeColor;
+                                button5.BackColor = button1.BackColor;
+                                button5.ForeColor = button1.ForeColor;
                                 button6.BackColor = button1.BackColor;
                                 button6.ForeColor = button1.ForeColor;
+                                isDarkTheme = false;
                                 this.BackColor = SystemColors.Control;
                                 break;
                             case "1":
@@ -91,6 +97,10 @@ namespace LocalNetworkFileShare
                                 richTextBox1.ForeColor = Color.White;
                                 button1.BackColor = Color.FromArgb(54, 54, 54);
                                 button1.ForeColor = Color.White;
+                                button4.BackColor = Color.FromArgb(54, 54, 54);
+                                button4.ForeColor = Color.White;
+                                button5.BackColor = Color.FromArgb(54, 54, 54);
+                                button5.ForeColor = Color.White;
                                 button2.ForeColor = Color.White;
                                 button2.BackColor = Color.FromArgb(54, 54, 54);
                                 button3.BackColor = Color.Maroon;
@@ -102,6 +112,7 @@ namespace LocalNetworkFileShare
                                 textBox2.BackColor = textBox1.BackColor;
                                 button6.BackColor = button1.BackColor;
                                 button6.ForeColor = button1.ForeColor;
+                                isDarkTheme = true;
                                 break;
                             case "2":
                                 break;
@@ -442,14 +453,33 @@ namespace LocalNetworkFileShare
         public string encoding = "";
         public CommitCard(Point Location,Control par, string CommitName, string Weight)
         {
-            Panel backGround = new Panel() { Parent = par,BackColor = Color.White,Location = Location,Size = new Size(210,100)};
-            Label name = new Label() { Text = CommitName,ForeColor = Color.Black,Parent = backGround, Location = new Point(10,10),Size = new Size(180,20)};
-            Label weight = new Label() { Text = Weight, ForeColor = Color.Black,Parent = backGround, Location = new Point(10, 30), Size = new Size(180,20)};
-            name.Click += new EventHandler(Click);
-            name.Cursor = Cursors.Hand;
-            backGround.Show();
-            name.Show();
-            weight.Show();
+            Panel backGround;
+            Label name;
+            Label weight;
+            ConnectedUserForm classPar = (ConnectedUserForm)par.Parent.Parent;
+            if (classPar.isDarkTheme == true) {
+                backGround = new Panel() { Parent = par, BackColor = Color.White, Location = Location, Size = new Size(210, 100) };
+                name = new Label() { Text = CommitName, ForeColor = Color.Black, Parent = backGround, Location = new Point(10, 10), Size = new Size(180, 20) };
+                weight = new Label() { Text = Weight, ForeColor = Color.Black, Parent = backGround, Location = new Point(10, 30), Size = new Size(180, 20) };
+
+                name.Click += new EventHandler(Click);
+                name.Cursor = Cursors.Hand;
+                backGround.Show();
+                name.Show();
+                weight.Show();
+            }
+            else
+            {
+                backGround = new Panel() { Parent = par, BackColor = Color.Gray, Location = Location, Size = new Size(210, 100) };
+                name = new Label() { Text = CommitName, ForeColor = Color.White, Parent = backGround, Location = new Point(10, 10), Size = new Size(180, 20) };
+                weight = new Label() { Text = Weight, ForeColor = Color.White, Parent = backGround, Location = new Point(10, 30), Size = new Size(180, 20) };
+
+                name.Click += new EventHandler(Click);
+                name.Cursor = Cursors.Hand;
+                backGround.Show();
+                name.Show();
+                weight.Show();
+            }
         }
         private void Click(object sender,EventArgs e)
         {

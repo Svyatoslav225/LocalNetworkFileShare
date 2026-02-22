@@ -340,7 +340,9 @@ namespace LocalNetworkFileShare
                         string txtRec = Encoding.UTF8.GetString(buffRec, 0, count);
                         if (txtRec == "RD")
                         {
-                            await sock.SendAsync(buffer, 0);
+                            for (int sent = 0;sent < buffer.Length;) {
+                                sent += await sock.SendAsync(new ArraySegment<byte>(buffer,sent,(buffer.Length - sent)), 0);
+                            }
                         }
                         buffer = new byte[0];
                         sock.Close();
@@ -363,7 +365,10 @@ namespace LocalNetworkFileShare
                         string txtRec = Encoding.UTF8.GetString(buffRec, 0, count);
                         if (txtRec == "RD")
                         {
-                            await sock.SendAsync(buffer.fileBuffer, 0);
+                            for (int sent = 0; sent < buffer.fileBuffer.Length;)
+                            {
+                                sent += await sock.SendAsync(new ArraySegment<byte>(buffer.fileBuffer, sent, (buffer.fileBuffer.Length - sent)), 0);
+                            }
                         }
                         buffer = null;
                         sock.Close();
@@ -505,10 +510,9 @@ namespace LocalNetworkFileShare
                         if (encoding == "UTF-8") {
                             try
                             {
-                                for (int counts = 0; counts <= Convert.ToInt32(recSpl[2]); counts++)
+                                for (int sent = 0; sent < bufferRec.Length;)
                                 {
-                                    int countT = await sock.ReceiveAsync(bufferRec, 0);
-                                    sock.Close();
+                                    sent += await sock.ReceiveAsync(new ArraySegment<byte>(bufferRec, sent, (bufferRec.Length - sent)), 0);
                                 }
                             }
                             catch (Exception ex) { /*MessageBox.Show(ex.Message);*/ }
@@ -520,10 +524,9 @@ namespace LocalNetworkFileShare
                             string keyStr = Encoding.UTF8.GetString(KeyBuff, 0, countS);
                             try
                             {
-                                for (int counts = 0; counts <= Convert.ToInt32(recSpl[2]); counts++)
+                                for (int sent = 0; sent < bufferRec.Length;)
                                 {
-                                    int countT = await sock.ReceiveAsync(bufferRec, 0);
-                                    sock.Close();
+                                    sent += await sock.ReceiveAsync(new ArraySegment<byte>(bufferRec, sent, (bufferRec.Length - sent)), 0);
                                 }
                             }
                             catch (Exception ex) { /*MessageBox.Show(ex.Message);*/ }
@@ -536,6 +539,7 @@ namespace LocalNetworkFileShare
                         }
                         File.WriteAllBytes($"{path}.{recSpl[3]}", bufferRec);
                         bufferRec = new byte[0];
+                        sock.Close();
                     }
                 }
             }

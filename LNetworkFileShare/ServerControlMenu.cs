@@ -443,9 +443,9 @@ namespace LocalNetworkFileShare
                                         byte[] ansBuff = Encoding.UTF8.GetBytes("RD");
                                         await handler.SendAsync(ansBuff, 0);
                                         byte[] buffRec = new byte[Convert.ToInt32(DoublePointSplitted[1])];
-                                        for (int count = 0; count <= Convert.ToInt32(DoublePointSplitted[2]); count++)
+                                        for (int sent = 0; sent < buffRec.Length;)
                                         {
-                                            await handler.ReceiveAsync(buffRec, 0);
+                                            sent += await handler.ReceiveAsync(new ArraySegment<byte>(buffRec,sent,(buffRec.Length - sent)),0);
                                         }
                                         CommitData data = new CommitData();
                                         data.CommitID = CommitsList.Count.ToString();
@@ -475,7 +475,7 @@ namespace LocalNetworkFileShare
                                             }
                                         }
                                         catch (Exception) { }
-
+                                        
                                         ansBuff = new byte[0];
                                         buffRec = new byte[0];
                                     }
@@ -487,9 +487,9 @@ namespace LocalNetworkFileShare
                                         string Key = Encoding.UTF8.GetString(KeyBuffer, 0, countk);
                                         byte[] buffRecB = new byte[Convert.ToInt32(DoublePointSplitted[1])];
                                         await handler.SendAsync(ansBuff, 0);
-                                        for (int count = 0; count <= Convert.ToInt32(DoublePointSplitted[2]); count++)
+                                        for (int sent = 0; sent < buffRecB.Length;)
                                         {
-                                            await handler.ReceiveAsync(buffRecB, 0);
+                                            sent += await handler.ReceiveAsync(new ArraySegment<byte>(buffRecB, sent, (buffRecB.Length - sent)), 0);
                                         }
                                         byte[] buffRec = new byte[0];
                                         try
@@ -547,7 +547,10 @@ namespace LocalNetworkFileShare
                                             string[] spl = CommitsList[Convert.ToInt32(DoublePointSplitted[1])].pathToFileInServer.Split(".");
                                             byte[] bufferF = Encoding.UTF8.GetBytes($"GFFS:{FileBuffer.Length}:15:{spl[2]}");
                                             await handler.SendAsync(bufferF, 0);
-                                            await handler.SendAsync(FileBuffer, 0);
+                                            for (int sent = 0; sent < FileBuffer.Length;)
+                                            {
+                                                sent += await handler.SendAsync(new ArraySegment<byte>(FileBuffer, sent, (FileBuffer.Length - sent)), 0);
+                                            }
                                             DateTime timeI = DateTime.Now;
                                             richTextBox1.Text += $"{timeI.Hour}h:{timeI.Minute}m:{timeI.Second}s >> User downloaded file from server ({FileBuffer.Length} bytes);\n";
                                             FileBuffer = new byte[0];
@@ -562,7 +565,10 @@ namespace LocalNetworkFileShare
                                             byte[] keyBuff = Encoding.UTF8.GetBytes(encF.Key);
                                             Thread.Sleep(10);
                                             await handler.SendAsync(keyBuff, 0);
-                                            await handler.SendAsync(encF.fileBuffer, 0);
+                                            for (int sent = 0; sent < encF.fileBuffer.Length;)
+                                            {
+                                                sent += await handler.SendAsync(new ArraySegment<byte>(encF.fileBuffer, sent, (encF.fileBuffer.Length - sent)), 0);
+                                            }
                                             DateTime timeI = DateTime.Now;
                                             FileBuffer = new byte[0];
                                             richTextBox1.Text += $"{timeI.Hour}h:{timeI.Minute}m:{timeI.Second}s >> User downloaded file from server ({encF.fileBuffer.Length} bytes);\n";

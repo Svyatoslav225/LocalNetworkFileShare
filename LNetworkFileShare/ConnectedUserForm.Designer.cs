@@ -312,10 +312,9 @@
             Controls.Add(panel3);
             Controls.Add(panel2);
             Controls.Add(panel1);
-            FormBorderStyle = FormBorderStyle.Fixed3D;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(3, 4, 3, 4);
-            MaximizeBox = false;
+            MinimumSize = new Size(1583, 1274);
             Name = "ConnectedUserForm";
             Text = "Panel";
             FormClosing += ConnectedUserForm_FormClosing;

@@ -513,10 +513,9 @@
             Controls.Add(button2);
             Controls.Add(button1);
             Controls.Add(richTextBox1);
-            FormBorderStyle = FormBorderStyle.Fixed3D;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(3, 4, 3, 4);
-            MaximizeBox = false;
+            MinimumSize = new Size(1807, 1497);
             Name = "ServerControlMenu";
             Text = "Server Control Menu";
             FormClosing += ServerControlMenu_FormClosing;

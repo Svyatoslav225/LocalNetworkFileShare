@@ -118,16 +118,26 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="richTextBox1.Text" xml:space="preserve">
-    <value>Recommendations (follow them if you don't want to catch bug):
+    <value> LOCAL NETWORK FILE SHARER
 
+Local network file sharer - simple local network file sharing service for Windows.
+
+Recommendations (follow them if you don't want to catch bug):
 - Use buttons and panels to interact with program.
 - Don't use symbols ':','\n' in device name or commit name.
 - Don't try to change save-file.
-- Clearing connections panel in server panel will makes program work faster.
+- clearing connections panel in server panel will make program work faster.
 - Use button to update commits list in connected user panel.
 - Don't use more than one '.' in uplading/downloading file (one '.' is like '.txt').
 - When you are saving file write: path + name (with out file type); Example 'D:\Myfiles\save' (file type will be identified automatically)
-- Write 'help' in console if you need commands list</value>
+- Write 'help' in console if you need commands list
+
+
+ Recomendations for server exploitation:
+- I recomend to don't use ports like 80,443,22, because they can send your packages incorrect. (you can use ports like 1000+,5,1 and other rarely used ports)
+- You can enable auto-saving mode for logger and if something goes wrong, you'll be able to find error in log file.
+- You can use command 'ips_tot_conns_list' to see how many connections were created during server was working.
+- You can use command 'tot_mem_cln' to delete all unnecessary data.</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
